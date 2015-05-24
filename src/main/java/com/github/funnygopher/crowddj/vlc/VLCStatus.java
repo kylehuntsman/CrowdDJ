@@ -16,13 +16,15 @@ import java.net.URLConnection;
 
 public class VLCStatus {
 
+	public static final VLCStatus NO_CONNECTION = new VLCStatus();
+
     private boolean isConnected;
     private boolean isPlaying, isPaused, isStopped;
     private boolean isLooping;
     private boolean isRandom;
     private String currentSong;
 
-    public VLCStatus() {
+    private VLCStatus() {
         isConnected = false;
     }
 
@@ -102,11 +104,11 @@ public class VLCStatus {
         String string =
                 "-- VLC Status --" +
                 "\nisConnected: " + isConnected +
-                "\nisPlaying: " + isPlaying +
-                "\nisPaused:  " + isPaused +
-                "\nisStopped: " + isStopped +
-                "\nisLooping: " + isLooping +
-                "\nisRandom:  " + isRandom;
+                "\nisPlaying:   " + isPlaying +
+                "\nisPaused:    " + isPaused +
+                "\nisStopped:   " + isStopped +
+                "\nisLooping:   " + isLooping +
+                "\nisRandom:    " + isRandom;
 
         if(isPlaying || isPaused)
             string += "\nCurrent Song: " + currentSong;

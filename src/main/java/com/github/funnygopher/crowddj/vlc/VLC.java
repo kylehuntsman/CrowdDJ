@@ -1,6 +1,8 @@
 package com.github.funnygopher.crowddj.vlc;
 
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 
 /**
  * Represents a connection to an instance of a VLC media player. The VLC media player can be started by either manually opening VLC
@@ -24,6 +26,8 @@ public class VLC {
      */
     private int port;
 
+	private String password;
+
     /**
      * An instance of a <code>VLCController</code>. Can be used to control the VLC media player playlist.
      */
@@ -33,19 +37,27 @@ public class VLC {
      * Constructor for a <code>VLC</code> object. Uses the default port of 8080. Use this method of instantiation for
      * OS X and Linux machines, after starting VLC media player manually.
      */
-    public VLC() {
-        this(8080);
+    public VLC(String password) {
+        this(8080, password);
     }
 
     /**
      * Constructor for a <code>VLC</code> object.
      * @param port The port number in which the VLC media player web server is on.
      */
-    public VLC(int port) {
-        PLAYLIST = "http://localhost:" + port + "/requests/playlist.xml";
-        STATUS = "http://localhost:" + port + "/requests/status.xml";
+    public VLC(int port, String password) {
+        PLAYLIST = "http://:" + password + "@localhost:" + port + "/requests/playlist.xml";
+        STATUS = "http://:" + password + "@localhost:" + port + "/requests/status.xml";
 
         this.port = port;
+		this.password = password;
+
+		// This sets the default authentication method for url connections
+		Authenticator.setDefault(new Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication("", password.toCharArray());
+			}
+		});
 
         controller = new VLCController(this);
     }
@@ -59,8 +71,11 @@ public class VLC {
         if(getStatus().isConnected())
             return;
 
-        String parameters = "\"" + vlcPath + "\"" + " --http-port=" + port;
-        //     parameters = "vlc.exe" --http-port=8080
+        String parameters = "\"" + vlcPath + "\"" +
+				" --extraintf=http" +
+				" --http-port=" + port +
+				" --http-password=" + password;
+        //     parameters = "vlc.exe" --extraintf=http --http-port=8080 --http-password=password
 
         try {
             Runtime.getRuntime().exec("cmd /C " + parameters);
@@ -87,7 +102,7 @@ public class VLC {
     /**
      * @return A <code>VLCPlaylist</code> object, which can be used to get information about the current playlist.
      */
-    public VLCPlaylist getPlaylist() {
+    public VLCPlaylist getPlaylist() throws NoVLCConnectionException {
         return new VLCPlaylist(PLAYLIST);
     }
 }

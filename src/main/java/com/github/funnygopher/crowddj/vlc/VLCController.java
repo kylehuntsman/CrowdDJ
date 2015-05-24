@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VLCController {
 
@@ -15,7 +17,7 @@ public class VLCController {
         this.vlc = vlc;
     }
 
-    private VLCStatus sendGetRequest(String endPoint, String requestParameters) throws IOException {
+    private VLCStatus sendGetRequest(String endPoint, String requestParameters) throws NoVLCConnectionException {
         String urlString = endPoint;
 
         // Adds the ?command= to the url string
@@ -23,69 +25,110 @@ public class VLCController {
             urlString += "?command=" + requestParameters;
         }
 
-        // Sends the GET request
-        URL url = new URL(urlString);
-        URLConnection connection = url.openConnection();
-        connection.connect();
+		try {
+			// Sends the GET request
+			URL url = new URL(urlString);
+			URLConnection connection = url.openConnection();
+			connection.connect();
 
-        // Get the response
-        return new VLCStatus(connection.getInputStream());
+			// Get the response
+			return new VLCStatus(connection.getInputStream());
+		} catch (IOException e) {
+			// If connection.connect() can't connect, throw an error
+			throw new NoVLCConnectionException();
+		}
     }
 
     public VLCStatus add(File file) {
+		System.out.println("Adding " + file.getName() + ".");
+
+		// Checks if the file is an actual file, as well as an MP3
+		if(!file.getName().endsWith(".mp3")) {
+			System.err.append("Could not add " + file.getName() + ".\n");
+			return vlc.getStatus();
+		}
+
+		// Prepares the file path for HTTP by encoding it
         String filePath = file.getAbsolutePath();
         try {
             filePath = URLEncoder.encode(file.getAbsolutePath(), "UTF-8").replaceAll("\\+", "%20");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            System.err.append("There was an error while encoding a file path.\n");
+			e.printStackTrace();
         }
 
-        VLCStatus status = new VLCStatus();
+		// Attempts to send the GET request
         try {
-            return sendGetRequest(vlc.STATUS, "in_enqueue&input=" + filePath);
-        } catch (IOException e) {
-            System.err.append("Could not add " + file.getName() + ". Not connected to VLC media player.\n");
-            return status;
+			return sendGetRequest(vlc.STATUS, "in_enqueue&input=" + filePath);
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not add " + file.getName() + ". Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
         }
     }
 
     public VLCStatus play() {
-        VLCStatus status = new VLCStatus();
+		System.out.println("Starting playback.");
+
+		// Attempts to send the GET request
         try {
             return sendGetRequest(vlc.STATUS, "pl_play");
-        } catch (IOException e) {
-            System.err.append("Could not start playback. Not connected to VLC media player.\n");
-            return status;
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not start playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
         }
     }
 
+	public VLCStatus play(int id) {
+		System.out.println("Starting playback of song ID " + id + ".");
+
+		// Attempts to send the GET request
+		try {
+			if(id < 0 || id > vlc.getPlaylist().getLength())
+				throw new IndexOutOfBoundsException();
+
+			return sendGetRequest(vlc.STATUS, "pl_play&id=" + id);
+		} catch (NoVLCConnectionException e) {
+			e.printError("Could not start playback. Not connected to VLC media player.");
+			return VLCStatus.NO_CONNECTION;
+		} catch (IndexOutOfBoundsException e) {
+			System.err.append("Cancelled playback. Playlist does not contain a song with an ID of " + id + ".\n");
+			return vlc.getStatus();
+		}
+	}
+
     public VLCStatus stop() {
-        VLCStatus status = new VLCStatus();
+		System.out.println("Stopping playback.");
+
+		// Attempts to send the GET request
         try {
             return sendGetRequest(vlc.STATUS, "pl_stop");
-        } catch (IOException e) {
-            System.err.append("Could not stop playback. Not connected to VLC media player.\n");
-            return status;
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not stop playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
         }
     }
 
     public VLCStatus pause() {
-        VLCStatus status = new VLCStatus();
+		System.out.println("Pausing playback.");
+
+		// Attempts to send the GET request
         try {
             return sendGetRequest(vlc.STATUS, "pl_pause");
-        } catch (IOException e) {
-            System.err.append("Could not pause playback. Not connected to VLC media player.\n");
-            return status;
+        } catch (NoVLCConnectionException e) {
+			e.printError("Could not pause playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
         }
     }
 
     public VLCStatus toggleRandom() {
-        VLCStatus status = new VLCStatus();
+		System.out.println("Toggling random playback.");
+
+		// Attempts to send the GET request
         try {
             return sendGetRequest(vlc.STATUS, "pl_random");
-        } catch (IOException e) {
-            System.err.append("Could not toggle random playback. Not connected to VLC media player.\n");
-            return status;
+        } catch (NoVLCConnectionException e) {
+			e.printError("Could not toggle random playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
         }
     }
 }

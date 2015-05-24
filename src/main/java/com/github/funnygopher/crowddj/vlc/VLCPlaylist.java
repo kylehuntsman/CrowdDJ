@@ -15,37 +15,34 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 public class VLCPlaylist {
 
-    private boolean isConnected;
-    private NodeList playlist;
+	private List<VLCPlaylistItem> playlist;
 
-    public VLCPlaylist(String playlistURL) {
+    public VLCPlaylist(String playlistURL) throws NoVLCConnectionException {
         // Checks for a connection
         try {
             URL url = new URL(playlistURL);
             URLConnection connection = url.openConnection();
             connection.connect();
-            isConnected = true;
         } catch (IOException e) {
-            isConnected = false;
+			throw new NoVLCConnectionException();
         }
 
-        if(isConnected) {
-            try {
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                Document doc = dBuilder.parse(playlistURL);
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(playlistURL);
 
-                doc.getDocumentElement().normalize();
-                parse(doc);
-            } catch (ParserConfigurationException | SAXException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+			doc.getDocumentElement().normalize();
+			parse(doc);
+		} catch (ParserConfigurationException | SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     public VLCPlaylist(InputStream playlistXML) {
@@ -64,32 +61,28 @@ public class VLCPlaylist {
     }
 
     public File get(int index) throws IndexOutOfBoundsException {
-        if(index < 0 || index >= playlist.getLength()) {
-            throw new IndexOutOfBoundsException("The playlist contains [" + playlist.getLength() +
+        if(index < 0 || index >= playlist.size()) {
+            throw new IndexOutOfBoundsException("The playlist contains [" + playlist.size() +
                     "] songs, and was asked for the song at index [" + index + "].\n");
         }
 
-        Element playlistItem = (Element) playlist.item(index);
-        try {
-            URI fileURI = new URI(playlistItem.getAttribute("uri"));
-            return new File(fileURI);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        VLCPlaylistItem vlcPlaylistItem = playlist.get(index);
+		return new File(vlcPlaylistItem.getUri());
     }
 
     public File get(String songName) throws NullPointerException {
-        for (int i = 0; i < playlist.getLength(); i++) {
-            Element element = (Element) playlist.item(i);
-            if(element.getAttribute("name").contains(songName)) {
-                return get(i);
-            }
-        }
+		for(VLCPlaylistItem vlcPlaylistItem : playlist) {
+			if(vlcPlaylistItem.getName().equals(songName)) {
+
+			}
+		}
 
         throw new NullPointerException("A song with the name [" + songName + "] could not be found.\n");
     }
+
+	public int getLength() {
+		return playlist.size();
+	}
 
     private void parse(Document doc) {
         NodeList nodes = doc.getElementsByTagName("node");
@@ -103,7 +96,25 @@ public class VLCPlaylist {
         }
 
         if(playlistElement != null) {
-            playlist = playlistElement.getElementsByTagName("leaf");
-        }
+            NodeList playlistItems = playlistElement.getElementsByTagName("leaf");
+
+			for(int i = 0; i < playlistItems.getLength(); i++) {
+				Element item = (Element) playlistItems.item(i);
+				try {
+					String name = item.getAttribute("name");
+					int id = Integer.parseInt(item.getAttribute("id"));
+					int duration = Integer.parseInt(item.getAttribute("duration"));
+					URI uri = new URI(item.getAttribute("uri"));
+
+					VLCPlaylistItem vlcPlaylistItem = new VLCPlaylistItem(
+							name, id, duration, uri
+					);
+					playlist.add(vlcPlaylistItem);
+				} catch(URISyntaxException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
     }
 }
