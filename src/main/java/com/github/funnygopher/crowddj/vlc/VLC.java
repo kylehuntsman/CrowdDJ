@@ -72,13 +72,13 @@ public class VLC {
             return;
 
         String parameters = "\"" + vlcPath + "\"" +
-				" --extraintf=http" +
-				" --http-port=" + port +
-				" --http-password=" + password;
+				" --extraintf=http" + // Starts VLC with the web interface as an additional interface
+				" --http-port=" + port + // Tells the VLC web server what port to start on
+				" --http-password=" + password; // Sets the password for the VLC web server
         //     parameters = "vlc.exe" --extraintf=http --http-port=8080 --http-password=password
 
         try {
-            Runtime.getRuntime().exec("cmd /C " + parameters);
+            Runtime.getRuntime().exec("cmd /C " + parameters); // This is potentially dangerous...
         } catch (IOException e) {
             e.printStackTrace();
         }

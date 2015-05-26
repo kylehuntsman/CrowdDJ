@@ -9,8 +9,8 @@ public class Main {
     public static final String BLACKMILL = "D:/Users/Kyle/Music/Blackmill/Blackmill - Miracle";
 
     public static void main(String args[]) {
-        //startVLC();
-        //addMusic(new File(BLACKMILL));
+        startVLC();
+        addMusic(new File(BLACKMILL));
         testContains("MySong");
 
 		VLC vlc = new VLC(1337, "pass2");
