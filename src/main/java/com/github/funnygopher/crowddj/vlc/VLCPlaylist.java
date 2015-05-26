@@ -1,5 +1,6 @@
 package com.github.funnygopher.crowddj.vlc;
 
+import com.github.funnygopher.crowddj.SearchParty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -8,18 +9,17 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VLCPlaylist {
 
-	private List<VLCPlaylistItem> playlist;
+	private List<VLCPlaylistItem> playlist = new ArrayList<VLCPlaylistItem>();
 
     public VLCPlaylist(String playlistURL) throws NoVLCConnectionException {
         // Checks for a connection
@@ -45,44 +45,19 @@ public class VLCPlaylist {
 		}
     }
 
-    public VLCPlaylist(InputStream playlistXML) {
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(playlistXML);
-
-            doc.getDocumentElement().normalize();
-            parse(doc);
-        } catch (ParserConfigurationException | SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public File get(int index) throws IndexOutOfBoundsException {
-        if(index < 0 || index >= playlist.size()) {
-            throw new IndexOutOfBoundsException("The playlist contains [" + playlist.size() +
-                    "] songs, and was asked for the song at index [" + index + "].\n");
-        }
-
-        VLCPlaylistItem vlcPlaylistItem = playlist.get(index);
-		return new File(vlcPlaylistItem.getUri());
-    }
-
-    public File get(String songName) throws NullPointerException {
-		for(VLCPlaylistItem vlcPlaylistItem : playlist) {
-			if(vlcPlaylistItem.getName().equals(songName)) {
-
-			}
-		}
-
-        throw new NullPointerException("A song with the name [" + songName + "] could not be found.\n");
-    }
-
-	public int getLength() {
+	public int size() {
 		return playlist.size();
 	}
+
+    public SearchParty<VLCPlaylistItem> search(String name) {
+        for (VLCPlaylistItem vlcPlaylistItem : playlist) {
+            if(vlcPlaylistItem.getName().equals(name)) {
+                return new SearchParty<VLCPlaylistItem>(vlcPlaylistItem);
+            }
+        }
+
+        return new SearchParty<VLCPlaylistItem>();
+    }
 
     private void parse(Document doc) {
         NodeList nodes = doc.getElementsByTagName("node");

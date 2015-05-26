@@ -6,8 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class VLCController {
 
@@ -83,9 +81,9 @@ public class VLCController {
 
 		// Attempts to send the GET request
 		try {
-			if(id < 0 || id > vlc.getPlaylist().getLength())
-				throw new IndexOutOfBoundsException();
-
+			if(id < 0 || id > vlc.getPlaylist().size()) {
+                throw new IndexOutOfBoundsException();
+            }
 			return sendGetRequest(vlc.STATUS, "pl_play&id=" + id);
 		} catch (NoVLCConnectionException e) {
 			e.printError("Could not start playback. Not connected to VLC media player.");
