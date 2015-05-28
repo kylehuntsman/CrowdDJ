@@ -1,19 +1,33 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.javafx;
 
+import com.github.funnygopher.crowddj.CrowdDJ;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CrowdDJController implements Initializable {
+public class SetupController implements Initializable {
 
+    @FXML
     TextField txtPort;
+
+    @FXML
     PasswordField txtPassword;
+
+    @FXML
     Button bStart;
 
     @Override
@@ -37,7 +51,7 @@ public class CrowdDJController implements Initializable {
                     }
                 }
 
-                if(!txtPort.getText().isEmpty() && !txtPassword.getText().isEmpty()) {
+                if (!txtPort.getText().isEmpty() && !txtPassword.getText().isEmpty()) {
                     bStart.setDisable(false);
                 }
             }
@@ -51,6 +65,13 @@ public class CrowdDJController implements Initializable {
                 }
             }
         });
+
+        bStart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                onStartButtonClick();
+            }
+        });
     }
 
     private void onStartButtonClick() {
@@ -58,5 +79,22 @@ public class CrowdDJController implements Initializable {
         String password = txtPassword.getText();
 
         CrowdDJ crowdDJ = new CrowdDJ(port, password);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CrowdDJ.fxml"));
+            CrowdDJController controller = new CrowdDJController(crowdDJ);
+            loader.setController(controller);
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("CrowdDJ");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            Stage thisStage = (Stage) bStart.getScene().getWindow();
+            thisStage.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

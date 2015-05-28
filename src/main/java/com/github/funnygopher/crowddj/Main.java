@@ -1,7 +1,13 @@
 package com.github.funnygopher.crowddj;
 
+import com.github.funnygopher.crowddj.javafx.SetupController;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class Main extends Application {
 
@@ -12,22 +18,20 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        /*
-        FXMLLoader loader = new FXMLLoader(RectifierGUIController.class.getResource("/RectifierGUI.fxml"));
-        AnchorPane pane = loader.load();
-        RectifierGUIController controller = loader.getController();
-        controller.setParent(pane);
+    public void start(Stage primaryStage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(SetupController.class.getResource("/Setup.fxml"));
+        SetupController controller = new SetupController();
+        loader.setController(controller);
 
-        primaryStage.setTitle("Image Rectifier");
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/divide-64.png")));
-        Scene scene = new Scene(pane);
+        Parent root = loader.load();
+        primaryStage.setTitle("CrowdDJ Setup");
+
+        Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
-        */
     }
 
-    public static void setCrowdDJ(CrowdDJ crowdDJ) {
+    public static void setCrowdDJ() {
 
     }
 }
