@@ -25,6 +25,10 @@ public class CrowdDJ {
         return vlc;
     }
 
+    public boolean isVLCConnected() {
+        return vlc.getStatus().isConnected();
+    }
+
     public boolean hasValidVLCPath() {
         return validVLCPath;
     }
@@ -41,8 +45,7 @@ public class CrowdDJ {
 
     public boolean startVLC() {
         if(validVLCPath) {
-            vlc.start(vlcPath);
-            return true;
+            return vlc.start(vlcPath);
         }
 
         return false;

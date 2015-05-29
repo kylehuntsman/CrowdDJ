@@ -1,5 +1,6 @@
 package com.github.funnygopher.crowddj.vlc;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -67,9 +68,13 @@ public class VLC {
      * on the specified port, nothing happens. Currently doesn't support Mac OS X or Linux.
      * @param vlcPath The file path the the VLC media player executable file
      */
-    public void start(String vlcPath) {
+    public boolean start(String vlcPath) {
         if(getStatus().isConnected())
-            return;
+            return false;
+
+        File vlcExe = new File(vlcPath);
+        if(!vlcExe.isFile())
+            return false;
 
         String parameters = "\"" + vlcPath + "\"" +
 				" --extraintf=http" + // Starts VLC with the web interface as an additional interface
@@ -79,8 +84,10 @@ public class VLC {
 
         try {
             Runtime.getRuntime().exec("cmd /C " + parameters); // This is potentially dangerous...
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
