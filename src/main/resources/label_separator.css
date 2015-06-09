@@ -1,0 +1,13 @@
+.label-separator .line {
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
+    -fx-border-color: rgba(200, 200, 200, .5);
+}
+
+.label-separator .label {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-font-family: system;
+    -fx-font-size: 12px;
+    -fx-padding: 2 10;
+}

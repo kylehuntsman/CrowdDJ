@@ -99,7 +99,8 @@ public class SetupController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("CrowdDJ");
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
 
             Stage thisStage = (Stage) bStart.getScene().getWindow();

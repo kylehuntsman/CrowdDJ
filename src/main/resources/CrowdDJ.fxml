@@ -1,29 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.input.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button fx:id="bStartVLC" layoutX="518.0" layoutY="361.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="68.0" text="Start VLC" />
-      <TextField fx:id="txtVLCPath" layoutX="251.0" layoutY="361.0" prefHeight="25.0" prefWidth="260.0" />
-      <Label layoutX="183.0" layoutY="365.0" text="Path to VLC: " />
-      <MenuBar prefHeight="25.0" prefWidth="600.0">
+      <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="600.0">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu mnemonicParsing="false" text="Playback">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+              <MenuItem fx:id="miPlay" mnemonicParsing="false" text="Play" />
+                  <MenuItem fx:id="miPause" mnemonicParsing="false" text="Pause" />
+                  <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
+          <Menu mnemonicParsing="false" text="Tools">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+                  <Menu fx:id="mVLCSettings" mnemonicParsing="false" text="VLC Settings">
+                    <items>
+                        <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="VLC Path">
+                           <content>
+                              <TextField fx:id="txtVLCPath" prefWidth="260.0" promptText="VLC Path" />
+                           </content>
+                        </CustomMenuItem>
+                        <MenuItem fx:id="miStartVLC" mnemonicParsing="false" text="Start VLC Media Player" />
+                    </items>
+                  </Menu>
             </items>
           </Menu>
+            <Menu fx:id="mSetup" mnemonicParsing="false" text="Setup">
+               <items>
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                     <content>
+                        <TextField promptText="Port" />
+                     </content>
+                  </CustomMenuItem>
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                     <content>
+                        <PasswordField promptText="Password" />
+                     </content>
+                  </CustomMenuItem>
+               </items>
+            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>
