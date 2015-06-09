@@ -86,7 +86,8 @@ public class CrowdDJController implements Initializable {
             @Override
             public void handle(MouseEvent event) {
                 crowdDJ.getVLC().getController().stop();
-                updatePlaybackButtons();
+				updatePlaybackButtons();
+				updatePlaybackButtons();
             }
         });
 
@@ -118,6 +119,7 @@ public class CrowdDJController implements Initializable {
                     event.setDropCompleted(success);
                 }
                 event.consume();
+				updatePlaybackButtons();
             }
         });
     }
@@ -139,23 +141,24 @@ public class CrowdDJController implements Initializable {
 
     private void updatePlaybackButtons() {
         VLCStatus status = crowdDJ.getVLC().getStatus();
+		System.out.println(status);
 
         if(!status.isConnected()) {
             bPlay.setDisable(true);
             bPause.setDisable(true);
             bStop.setDisable(true);
         }
-        else if(status.isPlaying()) {
+		if(status.isPlaying()) {
             bPlay.setDisable(true);
             bPause.setDisable(false);
             bStop.setDisable(false);
         }
-        else if(status.isPaused()) {
+		if(status.isPaused()) {
             bPlay.setDisable(false);
             bPause.setDisable(true);
             bStop.setDisable(false);
         }
-        else if(status.isStopped()) {
+		if(status.isStopped()) {
             bPlay.setDisable(false);
             bPause.setDisable(true);
             bStop.setDisable(true);
