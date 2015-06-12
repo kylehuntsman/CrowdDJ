@@ -18,11 +18,15 @@ public class CrowdDJ {
 
     private VLCPlaylist playlist;
 
+    public CrowdDJ() {
+        this(8081, "root");
+    }
+
     public CrowdDJ(int port, String password) {
         this.port = port;
         this.password = password;
 
-        vlc = new VLC(port, password);
+        vlc = new VLC(8080, password);
         validVLCPath = false;
 
         playlist = new VLCPlaylist();

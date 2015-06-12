@@ -1,6 +1,6 @@
 package com.github.funnygopher.crowddj;
 
-import com.github.funnygopher.crowddj.javafx.SetupController;
+import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,19 +19,21 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(SetupController.class.getResource("/fxml/Setup.fxml"));
-        SetupController controller = new SetupController();
-        loader.setController(controller);
+        CrowdDJ crowdDJ = new CrowdDJ();
 
-        Parent root = loader.load();
-        primaryStage.setTitle("CrowdDJ Setup");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrowdDJ.fxml"));
+            CrowdDJController controller = new CrowdDJController(crowdDJ);
+            loader.setController(controller);
+            Parent root = loader.load();
 
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    public static void setCrowdDJ() {
-
+            Stage stage = new Stage();
+            stage.setTitle("CrowdDJ");
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

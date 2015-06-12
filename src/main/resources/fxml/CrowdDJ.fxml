@@ -17,7 +17,7 @@
                   <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Tools">
+          <Menu fx:id="mTools" mnemonicParsing="false" text="Tools">
             <items>
                   <Menu fx:id="mVLCSettings" mnemonicParsing="false" text="VLC Settings">
                     <items>

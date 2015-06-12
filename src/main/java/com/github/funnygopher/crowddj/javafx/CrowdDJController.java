@@ -35,7 +35,7 @@ public class CrowdDJController implements Initializable {
     MenuBar menuBar;
 
     @FXML
-    Menu mVLCSettings, mSetup;
+    Menu mTools, mVLCSettings, mSetup;
 
     @FXML
     MenuItem miStartVLC, miPlay, miPause, miStop;
@@ -69,7 +69,7 @@ public class CrowdDJController implements Initializable {
 
         updatePlaybackButtons();
         updatePlaylist();
-        //updateAlbumArt(); //TODO: If VLC isnt running when this fires, it crashes???
+        updateAlbumArt(); //TODO: If VLC isnt running when this fires, it crashes???
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
@@ -183,7 +183,7 @@ public class CrowdDJController implements Initializable {
                     @Override
                     protected void updateItem(VLCPlaylistItem item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(item != null) {
+                        if (item != null) {
                             setText(item.getName());
                         }
                     }
@@ -197,7 +197,7 @@ public class CrowdDJController implements Initializable {
             public void handle(MouseEvent event) {
                 VLCPlaylistItem currentItem = (VLCPlaylistItem) lvPlaylist.getSelectionModel().getSelectedItem();
 
-                if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                     play(currentItem.getId());
                 }
             }
@@ -252,6 +252,9 @@ public class CrowdDJController implements Initializable {
 
     private void updateAlbumArt() {
         Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
+        if(albumArt == null)
+            return;
+
         BackgroundImage bgImage = new BackgroundImage(albumArt, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
         Background background = new Background(bgImage);
         apRoot.setBackground(background);

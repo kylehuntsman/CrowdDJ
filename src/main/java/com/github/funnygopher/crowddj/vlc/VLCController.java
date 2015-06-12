@@ -68,8 +68,13 @@ public class VLCController {
 
     public Image getAlbumArt() {
         VLCStatus status = vlc.getStatus();
-        Image albumArt = new Image(status.getArtworkURL());
-        return albumArt;
+
+        if(status.isConnected()) {
+            Image albumArt = new Image(status.getArtworkURL());
+            return albumArt;
+        }
+
+        return null;
     }
 
     public VLCStatus play() {
