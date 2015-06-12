@@ -32,12 +32,12 @@
           </Menu>
             <Menu fx:id="mSetup" mnemonicParsing="false" text="Setup">
                <items>
-                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Port">
                      <content>
                         <TextField promptText="Port" />
                      </content>
                   </CustomMenuItem>
-                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Password">
                      <content>
                         <PasswordField promptText="Password" />
                      </content>
