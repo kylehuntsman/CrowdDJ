@@ -1,5 +1,7 @@
 package com.github.funnygopher.crowddj.vlc;
 
+import javafx.scene.image.Image;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -64,6 +66,12 @@ public class VLCController {
         }
     }
 
+    public Image getAlbumArt() {
+        VLCStatus status = vlc.getStatus();
+        Image albumArt = new Image(status.getArtworkURL());
+        return albumArt;
+    }
+
     public VLCStatus play() {
 		System.out.println("Starting playback.");
 
@@ -81,10 +89,13 @@ public class VLCController {
 
 		// Attempts to send the GET request
 		try {
-			if(id < 0 || id > vlc.getPlaylist().size()) {
-                throw new IndexOutOfBoundsException();
+            VLCPlaylist playlist = vlc.getPlaylist();
+            for (VLCPlaylistItem item : playlist.getItems()) {
+                if(item.getId() == id) {
+                    return sendGetRequest(vlc.STATUS, "pl_play&id=" + id);
+                }
             }
-			return sendGetRequest(vlc.STATUS, "pl_play&id=" + id);
+            throw new IndexOutOfBoundsException();
 		} catch (NoVLCConnectionException e) {
 			e.printError("Could not start playback. Not connected to VLC media player.");
 			return VLCStatus.NO_CONNECTION;

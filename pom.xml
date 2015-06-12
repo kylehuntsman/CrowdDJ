@@ -27,11 +27,11 @@
             <version>1.8</version>
         </dependency>
 
-        <!-- MongoDB -->
+        <!-- mp3agic for the album art -->
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>2.13.1</version>
+            <groupId>com.mpatric</groupId>
+            <artifactId>mp3agic</artifactId>
+            <version>0.8.3</version>
         </dependency>
     </dependencies>
 </project>

@@ -92,7 +92,7 @@ public class SetupController implements Initializable {
         CrowdDJ crowdDJ = new CrowdDJ(port, password);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CrowdDJ.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrowdDJ.fxml"));
             CrowdDJController controller = new CrowdDJController(crowdDJ);
             loader.setController(controller);
             Parent root = loader.load();

@@ -23,6 +23,11 @@ public class VLC {
     public final String STATUS;
 
     /**
+     * A URL to the VLC media player album art of the currently playing song.
+     */
+    public final String ALBUM_ART;
+
+    /**
      * The port number in which the VLC media player web server is on.
      */
     private int port;
@@ -49,6 +54,7 @@ public class VLC {
     public VLC(int port, String password) {
         PLAYLIST = "http://:" + password + "@localhost:" + port + "/requests/playlist.xml";
         STATUS = "http://:" + password + "@localhost:" + port + "/requests/status.xml";
+        ALBUM_ART = "http://:" + password + "@localhost:" + port + "/art";
 
         this.port = port;
 		this.password = password;

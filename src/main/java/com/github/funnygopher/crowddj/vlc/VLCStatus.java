@@ -23,6 +23,7 @@ public class VLCStatus {
     private boolean isLooping;
     private boolean isRandom;
     private String currentSong;
+    private String artworkURL;
 
     private VLCStatus() {
         isConnected = false;
@@ -99,6 +100,10 @@ public class VLCStatus {
         return currentSong;
     }
 
+    public String getArtworkURL() {
+        return artworkURL;
+    }
+
     @Override
     public String toString() {
         String string =
@@ -158,11 +163,10 @@ public class VLCStatus {
         NodeList infoNodes = meta.getElementsByTagName("info");
         for(int i = 0; i < infoNodes.getLength(); i++) {
             Element info = (Element) infoNodes.item(i);
-            if(!info.getAttribute("name").equals("filename"))
-                continue;
-
-            currentSong = info.getTextContent();
+            if(info.getAttribute("name").equals("filename"))
+                currentSong = info.getTextContent();
+            if(info.getAttribute("name").equals("artwork_url"))
+                artworkURL = info.getTextContent();
         }
-
     }
 }

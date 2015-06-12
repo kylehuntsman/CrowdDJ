@@ -19,7 +19,11 @@ import java.util.List;
 
 public class VLCPlaylist {
 
-	private List<VLCPlaylistItem> playlist = new ArrayList<VLCPlaylistItem>();
+	private List<VLCPlaylistItem> playlist;
+
+    public VLCPlaylist() {
+        playlist = new ArrayList<VLCPlaylistItem>();
+    }
 
     public VLCPlaylist(String playlistURL) throws NoVLCConnectionException {
         // Checks for a connection
@@ -30,6 +34,8 @@ public class VLCPlaylist {
         } catch (IOException e) {
 			throw new NoVLCConnectionException();
         }
+
+        playlist = new ArrayList<VLCPlaylistItem>();
 
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -45,19 +51,23 @@ public class VLCPlaylist {
 		}
     }
 
+	public List<VLCPlaylistItem> getItems() {
+		return playlist;
+	}
+
+	public SearchParty<VLCPlaylistItem> search(String name) {
+		for (VLCPlaylistItem vlcPlaylistItem : playlist) {
+			if(vlcPlaylistItem.getName().equals(name)) {
+				return new SearchParty<VLCPlaylistItem>(vlcPlaylistItem);
+			}
+		}
+
+		return new SearchParty<VLCPlaylistItem>();
+	}
+
 	public int size() {
 		return playlist.size();
 	}
-
-    public SearchParty<VLCPlaylistItem> search(String name) {
-        for (VLCPlaylistItem vlcPlaylistItem : playlist) {
-            if(vlcPlaylistItem.getName().equals(name)) {
-                return new SearchParty<VLCPlaylistItem>(vlcPlaylistItem);
-            }
-        }
-
-        return new SearchParty<VLCPlaylistItem>();
-    }
 
     private void parse(Document doc) {
         NodeList nodes = doc.getElementsByTagName("node");

@@ -1,19 +1,23 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
+import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.util.Callback;
 
 import java.io.File;
 import java.net.URL;
@@ -39,6 +43,15 @@ public class CrowdDJController implements Initializable {
     @FXML
     TextField txtVLCPath;
 
+    @FXML
+    ListView lvPlaylist;
+
+    @FXML
+    ImageView ivAlbumArt;
+
+    @FXML
+    AnchorPane apRoot;
+
     private CrowdDJ crowdDJ;
 
     public CrowdDJController(CrowdDJ crowdDJ) {
@@ -55,7 +68,9 @@ public class CrowdDJController implements Initializable {
         miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
 
         updatePlaybackButtons();
-        menuBar.getStylesheets().add(this.getClass().getResource("/label_separator.css").toExternalForm());
+        updatePlaylist();
+        updateAlbumArt();
+        menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
         // instance to the constructor of this class. This means the CrowdDJController is not tied to the form,
@@ -79,6 +94,8 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        Image playIcon = new Image(getClass().getResourceAsStream("/images/play-32.png"));
+        bPlay.setGraphic(new ImageView(playIcon));
         bPlay.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -86,6 +103,8 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        Image pauseIcon = new Image(getClass().getResourceAsStream("/images/pause-32.png"));
+        bPause.setGraphic(new ImageView(pauseIcon));
         bPause.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -93,6 +112,8 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        Image stopIcon = new Image(getClass().getResourceAsStream("/images/stop-32.png"));
+        bStop.setGraphic(new ImageView(stopIcon));
         bStop.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -148,8 +169,37 @@ public class CrowdDJController implements Initializable {
                 } else {
                     event.setDropCompleted(success);
                 }
+
                 event.consume();
                 updatePlaybackButtons();
+                updatePlaylist();
+            }
+        });
+
+        lvPlaylist.setCellFactory(new Callback<ListView, ListCell>() {
+            @Override
+            public ListCell call(ListView param) {
+                ListCell<VLCPlaylistItem> cell = new ListCell<VLCPlaylistItem>() {
+                    @Override
+                    protected void updateItem(VLCPlaylistItem item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.getName());
+                        }
+                    }
+                };
+                return cell;
+            }
+        });
+
+        lvPlaylist.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                VLCPlaylistItem currentItem = (VLCPlaylistItem) lvPlaylist.getSelectionModel().getSelectedItem();
+
+                if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    play(currentItem.getId());
+                }
             }
         });
 
@@ -181,6 +231,13 @@ public class CrowdDJController implements Initializable {
     private void play() {
         crowdDJ.getVLC().getController().play();
         updatePlaybackButtons();
+        updateAlbumArt();
+    }
+
+    private void play(int id) {
+        crowdDJ.getVLC().getController().play(id);
+        updatePlaybackButtons();
+        updateAlbumArt();
     }
 
     private void startVLC() {
@@ -191,6 +248,13 @@ public class CrowdDJController implements Initializable {
     private void stop() {
         crowdDJ.getVLC().getController().stop();
         updatePlaybackButtons();
+    }
+
+    private void updateAlbumArt() {
+        Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
+        BackgroundImage bgImage = new BackgroundImage(albumArt, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
+        Background background = new Background(bgImage);
+        apRoot.setBackground(background);
     }
 
     private void updatePlaybackButtons() {
@@ -217,5 +281,12 @@ public class CrowdDJController implements Initializable {
             bPause.setDisable(true);
             bStop.setDisable(true);
         }
+    }
+
+    private void updatePlaylist() {
+        VLCPlaylist playlist = crowdDJ.getPlaylist();
+        ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
+        playlist.getItems().forEach(item -> songNames.add(item));
+        lvPlaylist.setItems(songNames);
     }
 }
