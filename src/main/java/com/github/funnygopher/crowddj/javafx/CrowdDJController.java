@@ -69,7 +69,7 @@ public class CrowdDJController implements Initializable {
 
         updatePlaybackButtons();
         updatePlaylist();
-        updateAlbumArt();
+        //updateAlbumArt(); //TODO: If VLC isnt running when this fires, it crashes???
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
