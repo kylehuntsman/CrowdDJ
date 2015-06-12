@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="apRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: rgba(0, 0, 0, .05);" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="600.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Playback">
+            <items>
+              <MenuItem fx:id="miPlay" mnemonicParsing="false" text="Play" />
+                  <MenuItem fx:id="miPause" mnemonicParsing="false" text="Pause" />
+                  <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Tools">
+            <items>
+                  <Menu fx:id="mVLCSettings" mnemonicParsing="false" text="VLC Settings">
+                    <items>
+                        <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="VLC Path">
+                           <content>
+                              <TextField fx:id="txtVLCPath" prefWidth="260.0" promptText="VLC Path" />
+                           </content>
+                        </CustomMenuItem>
+                        <MenuItem fx:id="miStartVLC" mnemonicParsing="false" text="Start VLC Media Player" />
+                    </items>
+                  </Menu>
+            </items>
+          </Menu>
+            <Menu fx:id="mSetup" mnemonicParsing="false" text="Setup">
+               <items>
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Port">
+                     <content>
+                        <TextField promptText="Port" />
+                     </content>
+                  </CustomMenuItem>
+                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Password">
+                     <content>
+                        <PasswordField promptText="Password" />
+                     </content>
+                  </CustomMenuItem>
+               </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <AnchorPane fx:id="pMusicList" layoutX="14.0" layoutY="36.0" prefHeight="266.0" prefWidth="200.0" style="-fx-background-color: rgb(240, 240, 240);">
+         <children>
+            <Label alignment="CENTER" layoutX="23.0" layoutY="162.0" prefHeight="51.0" prefWidth="104.0" text="Drag-and-drop &#10;files music here &#10;to import" textAlignment="CENTER" />
+            <ListView fx:id="lvPlaylist" prefHeight="266.0" prefWidth="200.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutY="313.0" prefHeight="87.0" prefWidth="600.0">
+         <children>
+            <Button fx:id="bPlay" layoutX="270.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" />
+            <Button fx:id="bStop" layoutX="340.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" />
+            <Button fx:id="bPause" layoutX="200.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" />
+            <Separator layoutY="-1.0" prefHeight="0.0" prefWidth="600.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
