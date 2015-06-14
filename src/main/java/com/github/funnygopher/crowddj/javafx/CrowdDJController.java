@@ -50,6 +50,9 @@ public class CrowdDJController implements Initializable {
     ImageView ivAlbumArt;
 
     @FXML
+    Label lblDragAndDrop;
+
+    @FXML
     AnchorPane apRoot;
 
     private CrowdDJ crowdDJ;
@@ -69,7 +72,7 @@ public class CrowdDJController implements Initializable {
 
         updatePlaybackButtons();
         updatePlaylist();
-        updateAlbumArt(); //TODO: If VLC isnt running when this fires, it crashes???
+        updateAlbumArt();
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
@@ -142,6 +145,7 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        // Initial setup for drag and drop
         pMusicList.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
@@ -154,6 +158,7 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        // When the music is dropped onto the list, add all of the music to VLC
         pMusicList.setOnDragDropped(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
@@ -165,6 +170,8 @@ public class CrowdDJController implements Initializable {
                         success = true;
                         event.setDropCompleted(success);
                         db.getFiles().forEach(file -> addFile(file));
+                        lblDragAndDrop.setDisable(true);
+                        lblDragAndDrop.setVisible(false);
                     }
                 } else {
                     event.setDropCompleted(success);
@@ -176,6 +183,7 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        // Sets the list items to show the song names
         lvPlaylist.setCellFactory(new Callback<ListView, ListCell>() {
             @Override
             public ListCell call(ListView param) {
@@ -192,6 +200,7 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        // When the playlist is double clicked, play the selected song
         lvPlaylist.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -203,8 +212,22 @@ public class CrowdDJController implements Initializable {
             }
         });
 
-        addMenuLabel(mVLCSettings, "VLC Executable Path", 0);
+        apRoot.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 
+                // Moves buttons to center of window
+                bPlay.setLayoutX((newValue.doubleValue() / 2) - (bPlay.getPrefWidth() / 2));
+                bPause.setLayoutX(bPlay.getLayoutX() - 70);
+                bStop.setLayoutX(bPlay.getLayoutX() + 70);
+            }
+        });
+
+        // Sets the background color to black
+        apRoot.setStyle("-fx-background-color: black");
+
+        // Adds menu labels to the menus in the menu bar
+        addMenuLabel(mVLCSettings, "VLC Executable Path", 0);
         addMenuLabel(mSetup, "Port", 0);
         addMenuLabel(mSetup, "Password", 2);
     }
@@ -252,12 +275,15 @@ public class CrowdDJController implements Initializable {
 
     private void updateAlbumArt() {
         Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
-        if(albumArt == null)
+        if (albumArt == null)
             return;
 
-        BackgroundImage bgImage = new BackgroundImage(albumArt, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-        Background background = new Background(bgImage);
-        apRoot.setBackground(background);
+        ivAlbumArt.setImage(new Image(crowdDJ.getVLC().ALBUM_ART));
+
+        /*
+        ivAlbumArt.setFitWidth(apRoot.getWidth());
+        ivAlbumArt.setLayoutX((apRoot.getWidth() / 2) - (ivAlbumArt.getBoundsInParent().getWidth() / 2));
+        */
     }
 
     private void updatePlaybackButtons() {
@@ -290,6 +316,10 @@ public class CrowdDJController implements Initializable {
         VLCPlaylist playlist = crowdDJ.getPlaylist();
         ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
         playlist.getItems().forEach(item -> songNames.add(item));
+        if(playlist.size() > 0) {
+            lblDragAndDrop.setDisable(true);
+            lblDragAndDrop.setVisible(false);
+        }
         lvPlaylist.setItems(songNames);
     }
 }

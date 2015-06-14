@@ -70,8 +70,12 @@ public class VLCController {
         VLCStatus status = vlc.getStatus();
 
         if(status.isConnected()) {
-            Image albumArt = new Image(status.getArtworkURL());
-            return albumArt;
+            try {
+                Image albumArt = new Image(status.getArtworkURL());
+                return albumArt;
+            } catch(NullPointerException e) {
+                return null;
+            }
         }
 
         return null;
