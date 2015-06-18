@@ -1,9 +1,11 @@
 package com.github.funnygopher.crowddj;
 
+import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLC;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
+import org.eclipse.jetty.server.Server;
 
 import java.io.File;
 
@@ -12,6 +14,8 @@ public class CrowdDJ {
     private VLC vlc;
     private int port;
     private String password;
+
+    private Server server;
 
     private String vlcPath;
     private boolean validVLCPath;
@@ -30,6 +34,16 @@ public class CrowdDJ {
         validVLCPath = false;
 
         playlist = new VLCPlaylist();
+
+
+        try {
+            server = new Server(port);
+            server.setHandler(new PlaybackHandler(this));
+            server.start();
+        } catch (Exception e) {
+            System.err.append("Could not start server. Something is wrong...\n");
+            e.printStackTrace();
+        }
     }
 
     public VLC getVLC() {
@@ -73,5 +87,15 @@ public class CrowdDJ {
         }
 
         return false;
+    }
+
+    public void stopServer() {
+        if(server.isRunning()) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

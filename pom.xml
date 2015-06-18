@@ -27,11 +27,11 @@
             <version>1.8</version>
         </dependency>
 
-        <!-- mp3agic for the album art -->
+        <!-- Jetty web server for handling HTTP requests-->
         <dependency>
-            <groupId>com.mpatric</groupId>
-            <artifactId>mp3agic</artifactId>
-            <version>0.8.3</version>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.3.0.v20150612</version>
         </dependency>
     </dependencies>
 </project>

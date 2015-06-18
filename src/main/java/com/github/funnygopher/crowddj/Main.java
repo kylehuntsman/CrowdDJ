@@ -2,10 +2,12 @@ package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -28,6 +30,13 @@ public class Main extends Application {
             Parent root = loader.load();
 
             Stage stage = new Stage();
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    crowdDJ.stopServer();
+                }
+            });
+
             stage.setTitle("CrowdDJ");
             Scene scene = new Scene(root);
             stage.setScene(scene);
