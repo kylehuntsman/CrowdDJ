@@ -1,6 +1,6 @@
 package com.github.funnygopher.crowddj;
 
-import com.github.funnygopher.crowddj.h2.DBConfig;
+import com.github.funnygopher.crowddj.h2.DBUtil;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLC;
@@ -8,18 +8,13 @@ import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import org.eclipse.jetty.server.Server;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.text.MessageFormat;
-
-import static com.github.funnygopher.crowddj.jooq.Tables.*;
+import java.util.Properties;
 
 public class CrowdDJ {
 
@@ -34,6 +29,9 @@ public class CrowdDJ {
 
     private VLCPlaylist playlist;
 
+    private Properties prop;
+    private OutputStream output;
+
     public CrowdDJ() {
         this(8081, "root");
     }
@@ -45,21 +43,8 @@ public class CrowdDJ {
         vlc = new VLC(8080, password);
         validVLCPath = false;
 
-		// Loads any previous playlist into the application
-		try (Connection conn = DriverManager.getConnection(DBConfig.DATABASE, DBConfig.USERNAME, DBConfig.PASSWORD)) {
-			DSLContext db = DSL.using(conn, SQLDialect.H2);
-			Result<Record> result = db.select().from(PLAYLIST).fetch();
-
-			if(result.isEmpty()) {
-				System.out.println("There are no records!");
-			} else {
-				for(Record record : result) {
-					vlc.getController().add(new File(record.getValue(PLAYLIST.FILEPATH)));
-				}
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
+        // Check if the database is setup
+        setupDatabase();
 
         playlist = new VLCPlaylist();
 
@@ -123,6 +108,16 @@ public class CrowdDJ {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void setupDatabase() {
+        try (Connection conn = DBUtil.getConnection()) {
+            DSLContext db = DSL.using(conn);
+
+            db.execute(DBUtil.CREATE_PLAYLIST_TABLE);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -16,8 +16,7 @@ public class Main extends Application {
     private static CrowdDJ crowdDJ;
 
     public static void main(String args[]) {
-        // Check if database tables are present
-		launch(args);
+        launch(args);
     }
 
     @Override
