@@ -11,10 +11,8 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
 import java.io.File;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class CrowdDJ {
 
@@ -28,9 +26,6 @@ public class CrowdDJ {
     private boolean validVLCPath;
 
     private VLCPlaylist playlist;
-
-    private Properties prop;
-    private OutputStream output;
 
     public CrowdDJ() {
         this(8081, "root");
