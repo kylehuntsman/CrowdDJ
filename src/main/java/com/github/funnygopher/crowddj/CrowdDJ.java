@@ -1,13 +1,25 @@
 package com.github.funnygopher.crowddj;
 
+import com.github.funnygopher.crowddj.h2.DBConfig;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLC;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import org.eclipse.jetty.server.Server;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+
+import static com.github.funnygopher.crowddj.jooq.Tables.*;
 
 public class CrowdDJ {
 
@@ -33,8 +45,23 @@ public class CrowdDJ {
         vlc = new VLC(8080, password);
         validVLCPath = false;
 
-        playlist = new VLCPlaylist();
+		// Loads any previous playlist into the application
+		try (Connection conn = DriverManager.getConnection(DBConfig.DATABASE, DBConfig.USERNAME, DBConfig.PASSWORD)) {
+			DSLContext db = DSL.using(conn, SQLDialect.H2);
+			Result<Record> result = db.select().from(PLAYLIST).fetch();
 
+			if(result.isEmpty()) {
+				System.out.println("There are no records!");
+			} else {
+				for(Record record : result) {
+					vlc.getController().add(new File(record.getValue(PLAYLIST.FILEPATH)));
+				}
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+
+        playlist = new VLCPlaylist();
 
         try {
             server = new Server(port);
