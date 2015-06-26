@@ -21,24 +21,28 @@ public class PlaybackHandler extends AbstractHandler {
         httpServletResponse.setContentType("text/html; charset=utf-8");
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-        switch(s) {
-            case "/play":
-                crowdDJ.getVLC().getController().play();
-                break;
+        try {
+            switch (s) {
+                case "/play":
+                    crowdDJ.getController().play();
+                    break;
 
-            case "/pause":
-                crowdDJ.getVLC().getController().pause();
-                break;
+                case "/pause":
+                    crowdDJ.getController().pause();
+                    break;
 
-            case "/stop":
-                crowdDJ.getVLC().getController().stop();
-                break;
+                case "/stop":
+                    crowdDJ.getController().stop();
+                    break;
 
-            case "/status":
-                break;
+                case "/status":
+                    break;
 
-            case "/playlist":
-                break;
+                case "/playlist":
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         httpServletResponse.getWriter().println(s);

@@ -25,7 +25,7 @@ public class Main extends Application {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrowdDJ.fxml"));
-            CrowdDJController controller = new CrowdDJController(crowdDJ);
+            CrowdDJController controller = crowdDJ.getController();
             loader.setController(controller);
             Parent root = loader.load();
 
@@ -34,6 +34,11 @@ public class Main extends Application {
                 @Override
                 public void handle(WindowEvent event) {
                     crowdDJ.stopServer();
+                    try {
+                        Runtime.getRuntime().exec("taskkill /F /IM vlc.exe"); // This is potentially dangerous...
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 

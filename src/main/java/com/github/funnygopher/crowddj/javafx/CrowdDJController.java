@@ -1,9 +1,14 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.h2.DBUtil;
+import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -16,12 +21,19 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 
 import java.io.File;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
 
 public class CrowdDJController implements Initializable {
 
@@ -78,7 +90,8 @@ public class CrowdDJController implements Initializable {
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
         // instance to the constructor of this class. This means the CrowdDJController is not tied to the form,
         // like other controller classes. Without a CrowdDJController instance being tied to the form,
-        // SceneBuilder will not recognize annotated functions, hence all the manual setting of actions.
+        // SceneBuilder will not recognize @FXML annotated functions, hence all the manual setting
+        // of actions.
 
         txtVLCPath.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -212,16 +225,21 @@ public class CrowdDJController implements Initializable {
             }
         });
 
-        apRoot.widthProperty().addListener(new ChangeListener<Number>() {
+        // The listener for the resizing of the window
+        InvalidationListener resizeListener = new InvalidationListener() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-
-                // Moves buttons to center of window
-                bPlay.setLayoutX((newValue.doubleValue() / 2) - (bPlay.getPrefWidth() / 2));
+            public void invalidated(Observable observable) {
+                bPlay.setLayoutX((apRoot.getWidth() / 2) - (bPlay.getPrefWidth() / 2));
                 bPause.setLayoutX(bPlay.getLayoutX() - 70);
                 bStop.setLayoutX(bPlay.getLayoutX() + 70);
+
+                ivAlbumArt.setFitWidth(apRoot.getWidth());
+                ivAlbumArt.setFitHeight(ivAlbumArt.getFitWidth());
+                ivAlbumArt.setLayoutX((apRoot.getWidth() / 2) - (ivAlbumArt.getBoundsInParent().getWidth() / 2));
             }
-        });
+        };
+        apRoot.widthProperty().addListener(resizeListener);
+        apRoot.heightProperty().addListener(resizeListener);
 
         // Sets the background color to black
         apRoot.setStyle("-fx-background-color: black");
@@ -232,13 +250,18 @@ public class CrowdDJController implements Initializable {
         addMenuLabel(mSetup, "Password", 2);
     }
 
-    private void addFile(File file) {
+    public void addFile(File file) {
         if(file.isDirectory()) {
             for (File fileInDir : file.listFiles()) {
                 addFile(fileInDir);
             }
         } else {
-            crowdDJ.getVLC().getController().add(file);
+            List<File> playlist = crowdDJ.getPlaylist();
+
+            if(!playlist.contains(file)) {
+                playlist.add(file);
+                crowdDJ.getVLC().getController().add(file);
+            }
         }
     }
 
@@ -246,31 +269,52 @@ public class CrowdDJController implements Initializable {
         menu.getItems().add(index, new LabelSeparatorMenuItem(text));
     }
 
-    private void pause() {
+    public void pause() {
         crowdDJ.getVLC().getController().pause();
-        updatePlaybackButtons();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePlaybackButtons();
+            }
+        });
     }
 
-    private void play() {
+    public void play() {
         crowdDJ.getVLC().getController().play();
-        updatePlaybackButtons();
-        updateAlbumArt();
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePlaybackButtons();
+                updateAlbumArt();
+            }
+        });
     }
 
-    private void play(int id) {
+    public void play(int id) {
         crowdDJ.getVLC().getController().play(id);
-        updatePlaybackButtons();
-        updateAlbumArt();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePlaybackButtons();
+                updateAlbumArt();
+            }
+        });
     }
 
-    private void startVLC() {
+    public void startVLC() {
         crowdDJ.startVLC();
         updatePlaybackButtons();
     }
 
-    private void stop() {
+    public void stop() {
         crowdDJ.getVLC().getController().stop();
-        updatePlaybackButtons();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePlaybackButtons();
+            }
+        });
     }
 
     private void updateAlbumArt() {
@@ -279,11 +323,6 @@ public class CrowdDJController implements Initializable {
             return;
 
         ivAlbumArt.setImage(new Image(crowdDJ.getVLC().ALBUM_ART));
-
-        /*
-        ivAlbumArt.setFitWidth(apRoot.getWidth());
-        ivAlbumArt.setLayoutX((apRoot.getWidth() / 2) - (ivAlbumArt.getBoundsInParent().getWidth() / 2));
-        */
     }
 
     private void updatePlaybackButtons() {
@@ -295,17 +334,17 @@ public class CrowdDJController implements Initializable {
             bPause.setDisable(true);
             bStop.setDisable(true);
         }
-		if(status.isPlaying()) {
+        if(status.isPlaying()) {
             bPlay.setDisable(true);
             bPause.setDisable(false);
             bStop.setDisable(false);
         }
-		if(status.isPaused()) {
+        if(status.isPaused()) {
             bPlay.setDisable(false);
             bPause.setDisable(true);
             bStop.setDisable(false);
         }
-		if(status.isStopped()) {
+        if(status.isStopped()) {
             bPlay.setDisable(false);
             bPause.setDisable(true);
             bStop.setDisable(true);
@@ -313,13 +352,39 @@ public class CrowdDJController implements Initializable {
     }
 
     private void updatePlaylist() {
-        VLCPlaylist playlist = crowdDJ.getPlaylist();
-        ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
-        playlist.getItems().forEach(item -> songNames.add(item));
-        if(playlist.size() > 0) {
-            lblDragAndDrop.setDisable(true);
-            lblDragAndDrop.setVisible(false);
+        updateDatabase();
+        try {
+            // Updates the playlist listview with the names of the songs
+            VLCPlaylist vlcPlaylist = crowdDJ.getVLC().getPlaylist();
+            ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
+            vlcPlaylist.getItems().forEach(item -> songNames.add(item));
+            if(vlcPlaylist.size() > 0) {
+                lblDragAndDrop.setDisable(true);
+                lblDragAndDrop.setVisible(false);
+            }
+            lvPlaylist.setItems(songNames);
+
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not fetch playlist. Not connected to VLC media player.");
         }
-        lvPlaylist.setItems(songNames);
+    }
+
+    private void updateDatabase() {
+        List<File> playlist = crowdDJ.getPlaylist();
+
+        // Updates the PLAYLIST table in the database
+        try (Connection conn = DBUtil.getConnection()) {
+            DSLContext db = DSL.using(conn);
+
+            // Drop the table and recreate to clear the table. There's probably a better way to do this...
+            db.execute("DROP TABLE PLAYLIST");
+            db.execute(DBUtil.CREATE_PLAYLIST_TABLE);
+
+            for (File file : playlist) {
+                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(file.getPath()).returning().fetch();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

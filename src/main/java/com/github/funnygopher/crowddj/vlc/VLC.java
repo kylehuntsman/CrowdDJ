@@ -83,6 +83,7 @@ public class VLC {
             return false;
 
         String parameters = "\"" + vlcPath + "\"" +
+                " --qt-start-minimized" + // Starts the application minimized
 				" --extraintf=http" + // Starts VLC with the web interface as an additional interface
 				" --http-port=" + port + // Tells the VLC web server what port to start on
 				" --http-password=" + password; // Sets the password for the VLC web server

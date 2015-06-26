@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,9 +56,10 @@ public class VLCPlaylist {
 		return playlist;
 	}
 
-	public SearchParty<VLCPlaylistItem> search(String name) {
+	public SearchParty<VLCPlaylistItem> search(File file) {
 		for (VLCPlaylistItem vlcPlaylistItem : playlist) {
-			if(vlcPlaylistItem.getName().equals(name)) {
+			File songFile = new File(vlcPlaylistItem.getUri());
+			if(songFile.equals(file)) {
 				return new SearchParty<VLCPlaylistItem>(vlcPlaylistItem);
 			}
 		}
