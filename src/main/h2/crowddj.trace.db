@@ -1,0 +1,12 @@
+06-26 10:29:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "INFORMATION_SCHEMA" not found; SQL statement:
+select * from INFORMATION_SCHEMA [42102-187]
+06-26 10:29:40 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "INFORMATION_SCHEMA" not found; SQL statement:
+select * from PUBLIC.INFORMATION_SCHEMA [42102-187]
+06-26 10:29:56 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "INFORMATION_SCHEMA" not found; SQL statement:
+select * from PUBLIC.INFORMATION_SCHEMA [42102-187]
+06-26 10:30:07 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "INFORMATION_SCHEMA" not found; SQL statement:
+select * from PUBLIC.information_schema [42102-187]
