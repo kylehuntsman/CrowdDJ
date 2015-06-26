@@ -1,8 +1,5 @@
 package com.github.funnygopher.crowddj;
 
-import static com.github.funnygopher.crowddj.jooq.Tables.*;
-
-import com.github.funnygopher.crowddj.h2.DBConfig;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -11,23 +8,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.text.MessageFormat;
 
 public class Main extends Application {
 
     private static CrowdDJ crowdDJ;
 
     public static void main(String args[]) {
+        // Check if database tables are present
 		launch(args);
     }
 

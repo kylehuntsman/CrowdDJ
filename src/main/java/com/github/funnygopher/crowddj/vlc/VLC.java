@@ -12,7 +12,7 @@ import java.net.PasswordAuthentication;
  */
 public class VLC {
     /**
-     * A URL to the VLC media player crowddj.xml file. The file contains information about the current playlist.
+     * A URL to the VLC media player playlist file. The file contains information about the current playlist.
      */
     public final String PLAYLIST;
 
@@ -52,7 +52,7 @@ public class VLC {
      * @param port The port number in which the VLC media player web server is on.
      */
     public VLC(int port, String password) {
-        PLAYLIST = "http://:" + password + "@localhost:" + port + "/requests/crowddj.xml";
+        PLAYLIST = "http://:" + password + "@localhost:" + port + "/requests/playlist.xml";
         STATUS = "http://:" + password + "@localhost:" + port + "/requests/status.xml";
         ALBUM_ART = "http://:" + password + "@localhost:" + port + "/art";
 
