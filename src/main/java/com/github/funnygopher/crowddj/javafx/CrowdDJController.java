@@ -352,7 +352,6 @@ public class CrowdDJController implements Initializable {
     }
 
     private void updatePlaylist() {
-        updateDatabase();
         try {
             // Updates the playlist listview with the names of the songs
             VLCPlaylist vlcPlaylist = crowdDJ.getVLC().getPlaylist();
@@ -369,7 +368,7 @@ public class CrowdDJController implements Initializable {
         }
     }
 
-    private void updateDatabase() {
+    public void updateDatabase() {
         List<File> playlist = crowdDJ.getPlaylist();
 
         // Updates the PLAYLIST table in the database
