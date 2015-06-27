@@ -182,7 +182,8 @@ public class CrowdDJController implements Initializable {
                     if (db.hasFiles()) {
                         success = true;
                         event.setDropCompleted(success);
-                        db.getFiles().forEach(file -> addFile(file));
+                        for(File file : db.getFiles())
+                            addFile(file);
                         lblDragAndDrop.setDisable(true);
                         lblDragAndDrop.setVisible(false);
                     }
@@ -352,6 +353,7 @@ public class CrowdDJController implements Initializable {
     }
 
     private void updatePlaylist() {
+        updateDatabase();
         try {
             // Updates the playlist listview with the names of the songs
             VLCPlaylist vlcPlaylist = crowdDJ.getVLC().getPlaylist();

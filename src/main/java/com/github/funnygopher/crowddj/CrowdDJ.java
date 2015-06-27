@@ -86,7 +86,7 @@ public class CrowdDJ {
 
             // Adds the songs to VLC
             for (File file : playlist) {
-                controller.addFile(file);
+                vlc.getController().add(file);
             }
         }
 
