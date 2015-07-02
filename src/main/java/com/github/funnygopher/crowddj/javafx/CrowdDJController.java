@@ -1,7 +1,6 @@
 package com.github.funnygopher.crowddj.javafx;
 
-import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.h2.DBUtil;
+import com.github.funnygopher.crowddj.*;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
@@ -257,10 +256,9 @@ public class CrowdDJController implements Initializable {
                 addFile(fileInDir);
             }
         } else {
-            List<File> playlist = crowdDJ.getPlaylist();
-
-            if(!playlist.contains(file)) {
-                playlist.add(file);
+            PlaylistManager playlist = crowdDJ.getPlaylist();
+			if(!playlist.search(file).found()) {
+				playlist.add(file);
                 crowdDJ.getVLC().getController().add(file);
             }
         }
@@ -371,18 +369,19 @@ public class CrowdDJController implements Initializable {
     }
 
     public void updateDatabase() {
-        List<File> playlist = crowdDJ.getPlaylist();
+		DatabaseManager database = crowdDJ.getDatabase();
+        PlaylistManager playlist = crowdDJ.getPlaylist();
 
         // Updates the PLAYLIST table in the database
-        try (Connection conn = DBUtil.getConnection()) {
+        try (Connection conn = database.getConnection()) {
             DSLContext db = DSL.using(conn);
 
             // Drop the table and recreate to clear the table. There's probably a better way to do this...
             db.execute("DROP TABLE PLAYLIST");
-            db.execute(DBUtil.CREATE_PLAYLIST_TABLE);
+            db.execute(database.CREATE_PLAYLIST_TABLE);
 
-            for (File file : playlist) {
-                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(file.getPath()).returning().fetch();
+            for (Song song : playlist.getItems()) {
+                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(song.getFile().getPath()).returning().fetch();
             }
         } catch (SQLException e) {
             e.printStackTrace();

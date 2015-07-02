@@ -1,6 +1,5 @@
 package com.github.funnygopher.crowddj;
 
-import com.github.funnygopher.crowddj.h2.DBUtil;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
 import com.github.funnygopher.crowddj.vlc.*;
@@ -34,9 +33,9 @@ public class CrowdDJ {
     private String vlcPath;
     private boolean validVLCPath;
 
-    private List<File> playlist;
-
-    private Properties properties;
+    private PropertyManager properties;
+	private DatabaseManager database;
+	private PlaylistManager playlist;
 
     public CrowdDJ() {
         this(8081, "root");
@@ -47,27 +46,31 @@ public class CrowdDJ {
         this.password = password;
         this.controller = new CrowdDJController(this);
 
+		// Sets up the properties file
+		properties = new PropertyManager("config.properties");
+
+		// Sets up the database
+		String dbUsername = properties.getStringProperty(Property.DB_USERNAME);
+		String dbPassword = properties.getStringProperty(Property.DB_PASSWORD);
+		database = new DatabaseManager("jdbc:h2:~/.CrowdDJ/db/crowddj", dbUsername, dbPassword);
+
+		// Sets up the playlist
+		playlist = new PlaylistManager();
+
         // Sets up the VLC connection
-        vlc = new VLC(8080, password);
-
-        playlist = new ArrayList<File>();
-
-        // Creates the properties file
-        properties = getProperties();
-        saveProperties();
-
-        // Creates the database and tables if they don't exist
-        setupDatabase();
+		int vlcPort = properties.getIntProperty(Property.VLC_PORT);
+		String vlcPass = properties.getStringProperty(Property.VLC_PASSWORD);
+        vlc = new VLC(vlcPort, vlcPass);
 
         // Takes each song saved in the PLAYLIST table and adds it to the playlist
-        try (Connection conn = DBUtil.getConnection()) {
+        try (Connection conn = database.getConnection()) {
             DSLContext db = DSL.using(conn, SQLDialect.H2);
             Result<Record> results = db.select().from(PLAYLIST).fetch();
 
             for (Record result : results) {
                 String filepath = result.getValue(PLAYLIST.FILEPATH);
                 File file = new File(filepath);
-                playlist.add(file);
+				playlist.add(file);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -75,18 +78,9 @@ public class CrowdDJ {
 
         boolean vlcStarted = vlc.start(vlcPath);
         if(vlcStarted) {
-            /*
-            // Takes all the songs currently in the VLC instance and adds them to the playlist
-            VLCPlaylist vlcPlaylist = vlc.getPlaylist();
-            for (VLCPlaylistItem vlcPlaylistItem : vlcPlaylist.getItems()) {
-                File file = new File(vlcPlaylistItem.getUri());
-                playlist.add(file);
-            }
-            */
-
             // Adds the songs to VLC
-            for (File file : playlist) {
-                vlc.getController().add(file);
+            for (Song song : playlist.getItems()) {
+                vlc.getController().add(song.getFile());
             }
         }
 
@@ -105,16 +99,24 @@ public class CrowdDJ {
         return controller;
     }
 
+	public PropertyManager getProperties() {
+		return properties;
+	}
+
+	public DatabaseManager getDatabase() {
+		return database;
+	}
+
+	public PlaylistManager getPlaylist() {
+		return playlist;
+	}
+
     public VLC getVLC() {
         return vlc;
     }
 
     public VLCStatus getStatus() {
         return vlc.getStatus();
-    }
-
-    public List<File> getPlaylist() {
-        return playlist;
     }
 
     public boolean isVLCConnected() {
@@ -130,7 +132,6 @@ public class CrowdDJ {
         if(vlcExe.isFile()) {
             validVLCPath = true;
             this.vlcPath = vlcPath;
-            saveProperties();
         } else {
             validVLCPath = false;
         }
@@ -151,62 +152,6 @@ public class CrowdDJ {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private Properties getProperties() {
-        String filename = "config.properties";
-        Properties properties = new Properties();
-        InputStream input = null;
-
-        // Try loading from current directory
-        try {
-            File file = new File(filename);
-            input = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            input = null;
-        }
-
-        try {
-            if(input == null) {
-                // Try loading from classpath
-                input = getClass().getResourceAsStream(filename);
-            }
-
-            // If found, load from properties
-            properties.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        setVLCPath(properties.getProperty("VLCPath", "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe"));
-        return properties;
-    }
-
-    private void saveProperties() {
-        String filename = "config.properties";
-
-        try {
-            Properties properties = new Properties();
-            properties.setProperty("VLCPath", vlcPath);
-
-            File file = new File(filename);
-            OutputStream output = new FileOutputStream(file);
-            properties.store(output, "Configuration properties for the CrowdDJ Desktop Application");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setupDatabase() {
-        try (Connection conn = DBUtil.getConnection()) {
-            DSLContext db = DSL.using(conn);
-
-            db.execute(DBUtil.CREATE_PLAYLIST_TABLE);
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }
