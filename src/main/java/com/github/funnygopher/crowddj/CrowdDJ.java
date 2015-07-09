@@ -2,7 +2,8 @@ package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
-import com.github.funnygopher.crowddj.vlc.*;
+import com.github.funnygopher.crowddj.vlc.VLC;
+import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import org.eclipse.jetty.server.Server;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -10,12 +11,9 @@ import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
-import java.io.*;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
 
@@ -60,6 +58,7 @@ public class CrowdDJ {
         // Sets up the VLC connection
 		int vlcPort = properties.getIntProperty(Property.VLC_PORT);
 		String vlcPass = properties.getStringProperty(Property.VLC_PASSWORD);
+        vlcPath = properties.getStringProperty(Property.VLC_PATH);
         vlc = new VLC(vlcPort, vlcPass);
 
         // Takes each song saved in the PLAYLIST table and adds it to the playlist

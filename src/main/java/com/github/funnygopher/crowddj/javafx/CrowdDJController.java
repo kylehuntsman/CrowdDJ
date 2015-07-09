@@ -1,6 +1,9 @@
 package com.github.funnygopher.crowddj.javafx;
 
-import com.github.funnygopher.crowddj.*;
+import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.DatabaseManager;
+import com.github.funnygopher.crowddj.PlaylistManager;
+import com.github.funnygopher.crowddj.Song;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
@@ -29,7 +32,6 @@ import java.io.File;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
@@ -181,8 +183,7 @@ public class CrowdDJController implements Initializable {
                     if (db.hasFiles()) {
                         success = true;
                         event.setDropCompleted(success);
-                        for(File file : db.getFiles())
-                            addFile(file);
+                        db.getFiles().forEach(file -> addFile(file));
                         lblDragAndDrop.setDisable(true);
                         lblDragAndDrop.setVisible(false);
                     }
@@ -193,6 +194,7 @@ public class CrowdDJController implements Initializable {
                 event.consume();
                 updatePlaybackButtons();
                 updatePlaylist();
+                updateDatabase();
             }
         });
 
@@ -321,7 +323,7 @@ public class CrowdDJController implements Initializable {
         if (albumArt == null)
             return;
 
-        ivAlbumArt.setImage(new Image(crowdDJ.getVLC().ALBUM_ART));
+        ivAlbumArt.setImage(albumArt);
     }
 
     private void updatePlaybackButtons() {
@@ -351,9 +353,19 @@ public class CrowdDJController implements Initializable {
     }
 
     private void updatePlaylist() {
-        updateDatabase();
         try {
-            // Updates the playlist listview with the names of the songs
+            //Updates the playlist listview with the names of the songs
+        /*
+            PlaylistManager playlist = crowdDJ.getPlaylist();
+            ObservableList<Song> songTitles = FXCollections.observableArrayList();
+            playlist.getItems().forEach(song -> songTitles.add(song));
+            if(playlist.getItems().size() > 0) {
+                lblDragAndDrop.setDisable(true);
+                lblDragAndDrop.setVisible(false);
+            }
+            lvPlaylist.setItems(songTitles);
+        */
+
             VLCPlaylist vlcPlaylist = crowdDJ.getVLC().getPlaylist();
             ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
             vlcPlaylist.getItems().forEach(item -> songNames.add(item));

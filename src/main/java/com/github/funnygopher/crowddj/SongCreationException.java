@@ -8,8 +8,16 @@ public class SongCreationException extends Exception {
 
 	private Exception e;
 
-	public SongCreationException(Exception e, File file) {
-		message = "There was a problem creating a song object with " + file.getName();
+	public SongCreationException(File file) {
+        this(file, null);
+	}
+
+	public SongCreationException(File file, Exception e) {
+        this.file = file;
+        if(e == null)
+            this.e = this;
+
+        message = "There was a problem creating a song object with " + file.getName();
 	}
 
 	public File getFile() {
@@ -27,4 +35,6 @@ public class SongCreationException extends Exception {
 	public void printError(String err) {
 		System.err.append(err + "\n");
 	}
+
+
 }

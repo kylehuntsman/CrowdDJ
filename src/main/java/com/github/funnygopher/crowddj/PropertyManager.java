@@ -21,16 +21,16 @@ public class PropertyManager {
 	}
 
 	public String getStringProperty(Property property) {
-		return properties.getProperty(property.toString().toLowerCase());
+		return properties.getProperty(property.getValue());
 	}
 
 	public int getIntProperty(Property property) {
-		String value = properties.getProperty(property.toString().toLowerCase());
+		String value = properties.getProperty(property.getValue());
 		return Integer.valueOf(value);
 	}
 
 	public void saveProperties() {
-		savePropertiesFile(filename);
+		savePropertiesFile(filename, properties);
 	}
 
 	public void setProperty(String key, String value) {
@@ -58,15 +58,16 @@ public class PropertyManager {
 		input = getPropertiesFileStream(filename);
 
 		try {
-			if(input == null) {
-				// If not found, set default settings, and save the file
-				setDefaultValues(properties);
-				savePropertiesFile(filename);
-			}
+			if(input != null) {
+                // Load the properties from the file
+                input = getPropertiesFileStream(filename);
+                properties.load(input);
+			} else {
+                // Save a default properties file
+                properties = getDefaultProperties();
+                savePropertiesFile(filename, properties);
+            }
 
-			// Load the properties from the file
-			input = getPropertiesFileStream(filename);
-			properties.load(input);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,11 +75,12 @@ public class PropertyManager {
 		return properties;
 	}
 
-	private void savePropertiesFile(String filename) {
+	private void savePropertiesFile(String filename, Properties properties) {
 		try {
 			File file = new File(filename);
 			OutputStream output = new FileOutputStream(file);
 			properties.store(output, "Configuration properties for the CrowdDJ Desktop Application");
+            output.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -86,7 +88,9 @@ public class PropertyManager {
 		}
 	}
 
-	private void setDefaultValues(Properties properties) {
+	private Properties getDefaultProperties() {
+		Properties properties = new Properties();
+
 		// Sets default values for VLC media server
 		properties.setProperty(Property.VLC_PATH.getValue(), VLC_PATH);
 		properties.setProperty(Property.VLC_PORT.getValue(), String.valueOf(VLC_PORT));
@@ -98,5 +102,7 @@ public class PropertyManager {
 		// Sets the default values for the database
 		properties.setProperty(Property.DB_USERNAME.getValue(), DB_USERNAME);
 		properties.setProperty(Property.DB_PASSWORD.getValue(), DB_PASSWORD);
+
+		return properties;
 	}
 }

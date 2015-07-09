@@ -20,6 +20,10 @@ public class Song {
 
 	public Song(File file) throws SongCreationException {
 		this.file = file;
+
+		if(!file.getName().endsWith(".mp3"))
+            throw new SongCreationException(file);
+
 		getMp3Information(file);
 	}
 
@@ -56,16 +60,16 @@ public class Song {
 
 			title = metadata.get("title");
 			artist = metadata.get("creator");
-			duration = Double.parseDouble(metadata.get("xmpDM:duration"));
+			//duration = Double.parseDouble(metadata.get("xmpDM:duration"));
 
 		} catch(FileNotFoundException e) {
-			throw new SongCreationException(e, file);
+			throw new SongCreationException(file, e);
 		} catch(TikaException e) {
-			throw new SongCreationException(e, file);
+			throw new SongCreationException(file, e);
 		} catch(SAXException e) {
-			throw new SongCreationException(e, file);
+			throw new SongCreationException(file, e);
 		} catch(IOException e) {
-			throw new SongCreationException(e, file);
+			throw new SongCreationException(file, e);
 		}
 	}
 }
