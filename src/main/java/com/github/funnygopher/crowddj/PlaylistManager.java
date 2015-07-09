@@ -42,4 +42,8 @@ public class PlaylistManager {
 
 		return new SearchParty<Song>();
 	}
+
+	public void vote(Song song) {
+		int votes = song.vote();
+	}
 }

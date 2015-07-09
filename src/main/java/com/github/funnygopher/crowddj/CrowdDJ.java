@@ -2,9 +2,13 @@ package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
+import com.github.funnygopher.crowddj.jetty.PlaylistHandler;
 import com.github.funnygopher.crowddj.vlc.VLC;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -86,8 +90,19 @@ public class CrowdDJ {
         // Starts the web server, telling it to look for playback commands
         try {
             server = new Server(port);
-            server.setHandler(new PlaybackHandler(this));
-            server.start();
+			ContextHandler playbackContext = new ContextHandler();
+			playbackContext.setContextPath("/playback");
+			playbackContext.setHandler(new PlaybackHandler(this));
+
+			ContextHandler playlistContext = new ContextHandler();
+			playlistContext.setContextPath("/playlist");
+			playlistContext.setHandler(new PlaylistHandler(this));
+
+			HandlerList handlers = new HandlerList();
+			handlers.setHandlers(new Handler[]{playbackContext, playlistContext});
+			server.setHandler(handlers);
+
+			server.start();
         } catch (Exception e) {
             System.err.append("Could not start server. Something is wrong...\n");
             e.printStackTrace();
