@@ -24,7 +24,7 @@ public class PlaybackHandler extends AbstractHandler {
 		String command = httpServletRequest.getParameter("command");
 		switch (command) {
 			case "play":
-				crowdDJ.getController().play();
+                crowdDJ.getController().play();
 				break;
 
 			case "pause":

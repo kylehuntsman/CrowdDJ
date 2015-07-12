@@ -12,9 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 public class PlaylistHandler extends AbstractHandler {
 
@@ -26,24 +23,16 @@ public class PlaylistHandler extends AbstractHandler {
 
 	@Override
 	public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
-		httpServletResponse.setContentType("text/xml; charset=utf-8");
+		httpServletResponse.setContentType("text/xml; charset=UTF-8");
 		httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-		String command = httpServletRequest.getParameter("command");
-		if(command != null) {
-			switch(command) {
-				case "vote":
-					String path = httpServletRequest.getParameter("song");
-					File songFile = new File(path);
-					SearchParty<Song> party = crowdDJ.getPlaylist().search(songFile);
-					if(party.found()) {
-						Song song = party.rescue();
-						crowdDJ.getPlaylist().vote(song);
-					}
-					break;
-
-				default:
-					break;
+		String fileURI = httpServletRequest.getParameter("vote");
+		if(fileURI != null) {
+			File songFile = new File(fileURI);
+			SearchParty<Song> party = crowdDJ.getPlaylist().search(songFile);
+			if(party.found()) {
+				Song song = party.rescue();
+				crowdDJ.getPlaylist().vote(song);
 			}
 		}
 
@@ -54,9 +43,9 @@ public class PlaylistHandler extends AbstractHandler {
 			xmlBuilder.append(song.toXML());
 		}
 		xmlBuilder.append("</playlist>");
-
+		String betterXML = xmlBuilder.toString().replaceAll("&", "&amp;");
 		httpServletResponse.getWriter().println(
-				xmlBuilder.toString()
+				betterXML
 		);
 		request.setHandled(true);
 	}

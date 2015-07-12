@@ -34,9 +34,13 @@ public class Song {
 		return file;
 	}
 
-	public String getFilePath() {
-		return file.getPath();
-	}
+	public String getURI() {
+        try {
+            return URLEncoder.encode(file.getPath(), "UTF-8").replaceAll("\\+", "%20").replaceAll("&", "%26");
+        } catch (UnsupportedEncodingException e) {
+            return String.valueOf(file.toURI());
+        }
+    }
 
 	public String getTitle() {
 		return title;
@@ -55,11 +59,15 @@ public class Song {
 	}
 
 	public String toXML() {
-		try {
-			return "<song title=\"" + title + "\" artist=\"" + artist + "\" votes=\"" + votes + "\" uri=\"" + URLEncoder.encode(file.getPath(), "UTF-8").replaceAll("\\+", "%20") + "\"/>";
-		} catch(UnsupportedEncodingException e) {
-			return "<song title=\"" + title + "\" artist=\"" + artist + "\" votes=\"" + votes + "\" uri=\"" + file.toURI() + "\"/>";
-		}
+		String xmlString = "<song>" +
+				"<title>" + title + "</title>" +
+				"<artist>" + artist + "</artist>" +
+				"<uri>" + getURI() + "</uri>" +
+				"<votes>" + votes + "</votes>" +
+				"</song>";
+
+		return xmlString;
+        //return "<song title=\"" + title + "\" artist=\"" + artist + "\" votes=\"" + votes + "\" uri=\"" + getURI() + "\"/>";
 	}
 
 	public int vote() {

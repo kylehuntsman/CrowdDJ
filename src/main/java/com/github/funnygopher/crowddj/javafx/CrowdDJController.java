@@ -1,9 +1,6 @@
 package com.github.funnygopher.crowddj.javafx;
 
-import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.DatabaseManager;
-import com.github.funnygopher.crowddj.PlaylistManager;
-import com.github.funnygopher.crowddj.Song;
+import com.github.funnygopher.crowddj.*;
 import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
@@ -244,7 +241,7 @@ public class CrowdDJController implements Initializable {
         apRoot.heightProperty().addListener(resizeListener);
 
         // Sets the background color to black
-        apRoot.setStyle("-fx-background-color: black");
+        //apRoot.setStyle("-fx-background-color: black");
 
         // Adds menu labels to the menus in the menu bar
         addMenuLabel(mVLCSettings, "VLC Executable Path", 0);
