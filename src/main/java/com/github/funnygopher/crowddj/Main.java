@@ -33,6 +33,7 @@ public class Main extends Application {
             stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 @Override
                 public void handle(WindowEvent event) {
+                    crowdDJ.getStatusManager().stop();
                     crowdDJ.stopServer();
                     try {
                         Runtime.getRuntime().exec("taskkill /F /IM vlc.exe"); // This is potentially dangerous...

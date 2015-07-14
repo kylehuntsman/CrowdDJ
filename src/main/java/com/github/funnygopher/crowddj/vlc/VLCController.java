@@ -1,5 +1,6 @@
 package com.github.funnygopher.crowddj.vlc;
 
+import com.github.funnygopher.crowddj.exceptions.NoVLCConnectionException;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -75,6 +76,8 @@ public class VLCController {
                 return albumArt;
             } catch(NullPointerException e) {
                 return null;
+            } catch (IllegalArgumentException e) {
+                return null;
             }
         }
 
@@ -134,6 +137,18 @@ public class VLCController {
             return sendGetRequest(vlc.STATUS, "pl_pause");
         } catch (NoVLCConnectionException e) {
 			e.printError("Could not pause playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
+        }
+    }
+
+    public VLCStatus next() {
+        System.out.println("Skipping to next song.");
+
+        // Attempts to send the GET request
+        try {
+            return sendGetRequest(vlc.STATUS, "pl_next");
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not skip to next song. Not connected to VLC media player.");
             return VLCStatus.NO_CONNECTION;
         }
     }

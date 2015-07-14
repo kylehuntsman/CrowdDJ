@@ -1,11 +1,13 @@
 package com.github.funnygopher.crowddj.javafx;
 
-import com.github.funnygopher.crowddj.*;
-import com.github.funnygopher.crowddj.vlc.NoVLCConnectionException;
+import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.Song;
+import com.github.funnygopher.crowddj.exceptions.NoVLCConnectionException;
+import com.github.funnygopher.crowddj.managers.DatabaseManager;
+import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
@@ -17,10 +19,11 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Callback;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -36,7 +39,7 @@ import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
 public class CrowdDJController implements Initializable {
 
     @FXML
-    Button bPlay, bPause, bStop;
+    Button bPlay, bPause, bStop, bShuffle, bNext;
 
     @FXML
     AnchorPane pMusicList;
@@ -60,12 +63,22 @@ public class CrowdDJController implements Initializable {
     ImageView ivAlbumArt;
 
     @FXML
-    Label lblDragAndDrop;
+    Label lblDragAndDrop, lbSongTime, lbSongTotalTime;
+
+    @FXML
+    Text lbTitle, lbArtist;
 
     @FXML
     AnchorPane apRoot;
 
-    private CrowdDJ crowdDJ;
+    @FXML
+    Rectangle rectTopFade, rectBottomFade;
+
+    @FXML
+    ProgressBar pbSongProgress;
+
+    CrowdDJ crowdDJ;
+    PlaybackManager playbackManager;
 
     public CrowdDJController(CrowdDJ crowdDJ) {
         this.crowdDJ = crowdDJ;
@@ -79,11 +92,10 @@ public class CrowdDJController implements Initializable {
 
         miStartVLC.setDisable(true);
         miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
-
-        updatePlaybackButtons();
         updatePlaylist();
-        updateAlbumArt();
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
+
+        playbackManager = new PlaybackManager(this);
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
         // instance to the constructor of this class. This means the CrowdDJController is not tied to the form,
@@ -108,53 +120,9 @@ public class CrowdDJController implements Initializable {
             }
         });
 
-        Image playIcon = new Image(getClass().getResourceAsStream("/images/play-32.png"));
-        bPlay.setGraphic(new ImageView(playIcon));
-        bPlay.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                play();
-            }
-        });
-
-        Image pauseIcon = new Image(getClass().getResourceAsStream("/images/pause-32.png"));
-        bPause.setGraphic(new ImageView(pauseIcon));
-        bPause.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                pause();
-            }
-        });
-
-        Image stopIcon = new Image(getClass().getResourceAsStream("/images/stop-32.png"));
-        bStop.setGraphic(new ImageView(stopIcon));
-        bStop.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                stop();
-            }
-        });
-
-        miPlay.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                play();
-            }
-        });
-
-        miPause.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                pause();
-            }
-        });
-
-        miStop.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                stop();
-            }
-        });
+        miPlay.setOnAction(playbackManager.PLAY);
+        miPause.setOnAction(playbackManager.PAUSE);
+        miStop.setOnAction(playbackManager.STOP);
 
         // Initial setup for drag and drop
         pMusicList.setOnDragOver(new EventHandler<DragEvent>() {
@@ -189,7 +157,6 @@ public class CrowdDJController implements Initializable {
                 }
 
                 event.consume();
-                updatePlaybackButtons();
                 updatePlaylist();
                 updateDatabase();
             }
@@ -224,13 +191,20 @@ public class CrowdDJController implements Initializable {
             }
         });
 
-        // The listener for the resizing of the window
+        // The listener for resizing the window, changes the size of the album art
         InvalidationListener resizeListener = new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
                 bPlay.setLayoutX((apRoot.getWidth() / 2) - (bPlay.getPrefWidth() / 2));
-                bPause.setLayoutX(bPlay.getLayoutX() - 70);
-                bStop.setLayoutX(bPlay.getLayoutX() + 70);
+                bPause.setLayoutX(bPlay.getLayoutX());
+                bStop.setLayoutX(bPlay.getLayoutX());
+
+                bShuffle.setLayoutX(bPlay.getLayoutX() - 40);
+                bNext.setLayoutX(bPlay.getLayoutX() + 70);
+
+                pbSongProgress.setLayoutX((apRoot.getWidth() / 2) - (pbSongProgress.getPrefWidth() / 2));
+                lbSongTime.setLayoutX(pbSongProgress.getLayoutX() - 43);
+                lbSongTotalTime.setLayoutX(pbSongProgress.getLayoutX() + 310);
 
                 ivAlbumArt.setFitWidth(apRoot.getWidth());
                 ivAlbumArt.setFitHeight(ivAlbumArt.getFitWidth());
@@ -240,13 +214,19 @@ public class CrowdDJController implements Initializable {
         apRoot.widthProperty().addListener(resizeListener);
         apRoot.heightProperty().addListener(resizeListener);
 
-        // Sets the background color to black
-        //apRoot.setStyle("-fx-background-color: black");
+        lbTitle.wrappingWidthProperty().bind(apRoot.widthProperty());
+        lbArtist.wrappingWidthProperty().bind(apRoot.widthProperty());
+
+        rectTopFade.widthProperty().bind(apRoot.widthProperty());
+        rectBottomFade.widthProperty().bind(apRoot.widthProperty());
 
         // Adds menu labels to the menus in the menu bar
         addMenuLabel(mVLCSettings, "VLC Executable Path", 0);
         addMenuLabel(mSetup, "Port", 0);
         addMenuLabel(mSetup, "Password", 2);
+
+        crowdDJ.getStatusManager().registerObserver(playbackManager);
+        crowdDJ.getStatusManager().start();
     }
 
     public void addFile(File file) {
@@ -267,86 +247,12 @@ public class CrowdDJController implements Initializable {
         menu.getItems().add(index, new LabelSeparatorMenuItem(text));
     }
 
-    public void pause() {
-        crowdDJ.getVLC().getController().pause();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                updatePlaybackButtons();
-            }
-        });
-    }
-
-    public void play() {
-        crowdDJ.getVLC().getController().play();
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                updatePlaybackButtons();
-                updateAlbumArt();
-            }
-        });
-    }
-
     public void play(int id) {
         crowdDJ.getVLC().getController().play(id);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                updatePlaybackButtons();
-                updateAlbumArt();
-            }
-        });
     }
 
     public void startVLC() {
         crowdDJ.startVLC();
-        updatePlaybackButtons();
-    }
-
-    public void stop() {
-        crowdDJ.getVLC().getController().stop();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                updatePlaybackButtons();
-            }
-        });
-    }
-
-    private void updateAlbumArt() {
-        Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
-        if (albumArt == null)
-            return;
-
-        ivAlbumArt.setImage(albumArt);
-    }
-
-    private void updatePlaybackButtons() {
-        VLCStatus status = crowdDJ.getVLC().getStatus();
-		System.out.println(status);
-
-        if(!status.isConnected()) {
-            bPlay.setDisable(true);
-            bPause.setDisable(true);
-            bStop.setDisable(true);
-        }
-        if(status.isPlaying()) {
-            bPlay.setDisable(true);
-            bPause.setDisable(false);
-            bStop.setDisable(false);
-        }
-        if(status.isPaused()) {
-            bPlay.setDisable(false);
-            bPause.setDisable(true);
-            bStop.setDisable(false);
-        }
-        if(status.isStopped()) {
-            bPlay.setDisable(false);
-            bPause.setDisable(true);
-            bStop.setDisable(true);
-        }
     }
 
     private void updatePlaylist() {
@@ -395,5 +301,15 @@ public class CrowdDJController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateLabels() {
+        VLCStatus status = crowdDJ.getStatus();
+        lbTitle.setText(status.getTitle());
+        lbArtist.setText(status.getArtist());
+    }
+
+    public PlaybackManager getPlaybackManager() {
+        return playbackManager;
     }
 }

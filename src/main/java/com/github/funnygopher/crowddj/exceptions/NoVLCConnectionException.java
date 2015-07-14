@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.vlc;
+package com.github.funnygopher.crowddj.exceptions;
 
 public class NoVLCConnectionException extends Exception {
 

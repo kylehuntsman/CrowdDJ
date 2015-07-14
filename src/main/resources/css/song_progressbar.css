@@ -1,0 +1,13 @@
+.progress-bar > .bar {
+    -fx-background-color: white;
+    -fx-background-insets: 0 0 0 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0.20em;
+}
+
+.progress-bar > .track {
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-background-insets: 0, 0 0 1 0, 1 1 2 1;
+    -fx-background-radius: 0, 0, 0; /* 10, 9, 8 */
+    -fx-opacity: 50%;
+}

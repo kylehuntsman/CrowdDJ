@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.managers;
 
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;

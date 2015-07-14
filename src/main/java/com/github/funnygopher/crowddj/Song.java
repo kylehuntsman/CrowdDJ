@@ -1,5 +1,6 @@
 package com.github.funnygopher.crowddj;
 
+import com.github.funnygopher.crowddj.exceptions.SongCreationException;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;

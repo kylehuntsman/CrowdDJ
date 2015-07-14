@@ -1,7 +1,7 @@
 package com.github.funnygopher.crowddj.jetty;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.PlaylistManager;
+import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.SearchParty;
 import com.github.funnygopher.crowddj.Song;
 import org.eclipse.jetty.server.Request;

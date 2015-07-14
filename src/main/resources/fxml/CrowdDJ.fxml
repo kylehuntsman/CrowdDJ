@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
@@ -11,6 +14,26 @@
 <AnchorPane fx:id="apRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView fx:id="ivAlbumArt" fitHeight="600.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
+      <Rectangle fx:id="rectTopFade" arcHeight="5.0" arcWidth="5.0" height="200.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <fill>
+            <LinearGradient endX="1.0" endY="1.0" startX="1.0">
+               <stops>
+                  <Stop color="#00000080" />
+                  <Stop color="#ffffff00" offset="1.0" />
+               </stops>
+            </LinearGradient>
+         </fill>
+      </Rectangle>
+      <Rectangle fx:id="rectBottomFade" arcHeight="5.0" arcWidth="5.0" height="200.0" layoutY="408.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <fill>
+            <LinearGradient endX="1.0" endY="1.0" startX="1.0">
+               <stops>
+                  <Stop color="#ffffff00" />
+                  <Stop color="#000000d9" offset="1.0" />
+               </stops>
+            </LinearGradient>
+         </fill>
+      </Rectangle>
       <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
           <Menu mnemonicParsing="false" text="Playback">
@@ -55,18 +78,40 @@
           </Menu>
         </menus>
       </MenuBar>
-      <AnchorPane fx:id="pMusicList" layoutX="14.0" layoutY="36.0" prefHeight="266.0" prefWidth="200.0" AnchorPane.bottomAnchor="98.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="36.0">
+      <AnchorPane fx:id="pMusicList" layoutX="14.0" layoutY="36.0" prefHeight="350.0" prefWidth="200.0" AnchorPane.bottomAnchor="214.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="36.0">
          <children>
-            <ListView fx:id="lvPlaylist" prefHeight="266.0" prefWidth="200.0" style="-fx-opacity: 80%;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <ListView fx:id="lvPlaylist" focusTraversable="false" prefHeight="266.0" prefWidth="200.0" style="-fx-opacity: 80%;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <Label fx:id="lblDragAndDrop" alignment="CENTER" layoutX="48.0" layoutY="108.0" prefHeight="51.0" prefWidth="104.0" text="Drag-and-drop &#10;files music here &#10;to import" textAlignment="CENTER" AnchorPane.bottomAnchor="107.0" AnchorPane.topAnchor="108.0" />
          </children>
       </AnchorPane>
-      <AnchorPane layoutY="313.0" prefHeight="87.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <AnchorPane layoutY="313.0" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
-            <Button fx:id="bPlay" layoutX="270.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="13.0" AnchorPane.topAnchor="14.0" />
-            <Button fx:id="bStop" layoutX="340.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="13.0" AnchorPane.topAnchor="14.0" />
-            <Button fx:id="bPause" layoutX="200.0" layoutY="14.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="13.0" AnchorPane.topAnchor="14.0" />
-            <Separator layoutY="-1.0" prefHeight="0.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <Text fx:id="lbTitle" fill="WHITE" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CrowdDJ" textAlignment="CENTER" wrappingWidth="600.0" y="14.0" AnchorPane.bottomAnchor="142.404296875">
+               <font>
+                  <Font name="Arial" size="50.0" />
+               </font>
+            </Text>
+            <Text fx:id="lbArtist" fill="#ffffff7f" layoutY="85.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Let The Crowd Choose" textAlignment="CENTER" wrappingWidth="600.0" AnchorPane.bottomAnchor="108.642578125">
+               <font>
+                  <Font name="Arial" size="30.0" />
+               </font>
+            </Text>
+            <Button fx:id="bPlay" layoutX="270.0" layoutY="104.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="36.0" />
+            <Button fx:id="bStop" layoutX="270.0" layoutY="104.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="36.0" />
+            <Button fx:id="bPause" layoutX="270.0" layoutY="104.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" AnchorPane.bottomAnchor="36.0" />
+            <ProgressBar fx:id="pbSongProgress" focusTraversable="false" layoutX="150.0" layoutY="181.0" minHeight="-Infinity" prefHeight="5.0" prefWidth="300.0" progress="1.0" AnchorPane.bottomAnchor="14.0" />
+            <Label fx:id="lbSongTotalTime" layoutX="460.0" layoutY="176.0" text="00:00" textFill="#ffffff80" AnchorPane.bottomAnchor="8.0">
+               <font>
+                  <Font name="Arial" size="13.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbSongTime" alignment="CENTER_RIGHT" layoutX="107.0" layoutY="176.0" text="00:00" textAlignment="RIGHT" textFill="#ffffff80" AnchorPane.bottomAnchor="8.0">
+               <font>
+                  <Font name="Arial" size="13.0" />
+               </font>
+            </Label>
+            <Button fx:id="bShuffle" layoutX="230.0" layoutY="119.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" AnchorPane.bottomAnchor="51.0" />
+            <Button fx:id="bNext" layoutX="340.0" layoutY="119.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" AnchorPane.bottomAnchor="51.0" />
          </children>
       </AnchorPane>
    </children>

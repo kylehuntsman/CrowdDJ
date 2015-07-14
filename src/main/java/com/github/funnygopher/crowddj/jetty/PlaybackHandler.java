@@ -1,6 +1,7 @@
 package com.github.funnygopher.crowddj.jetty;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.javafx.PlaybackManager;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -22,17 +23,18 @@ public class PlaybackHandler extends AbstractHandler {
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
 		String command = httpServletRequest.getParameter("command");
+		PlaybackManager playbackManager = crowdDJ.getController().getPlaybackManager();
 		switch (command) {
 			case "play":
-                crowdDJ.getController().play();
+                playbackManager.play();
 				break;
 
 			case "pause":
-				crowdDJ.getController().pause();
+				playbackManager.pause();
 				break;
 
 			case "stop":
-				crowdDJ.getController().stop();
+				playbackManager.stop();
 				break;
 
 			default:

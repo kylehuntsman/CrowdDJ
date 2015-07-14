@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -22,8 +23,12 @@ public class VLCStatus {
     private boolean isPlaying, isPaused, isStopped;
     private boolean isLooping;
     private boolean isRandom;
-    private String currentSong;
+    private String title;
     private String artworkURL;
+    private String artist;
+    private double position;
+    private int time;
+    private int length;
 
     private VLCStatus() {
         isConnected = false;
@@ -51,8 +56,13 @@ public class VLCStatus {
                 parse(doc);
             } catch (ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
+                isConnected = false;
+            } catch (ConnectException e) {
+                //e.printStackTrace();
+                isConnected = false;
             } catch (IOException e) {
                 e.printStackTrace();
+                isConnected = false;
             }
         }
     }
@@ -96,12 +106,20 @@ public class VLCStatus {
         return isRandom;
     }
 
-    public String getCurrentSong() {
-        return currentSong;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
     }
 
     public String getArtworkURL() {
         return artworkURL;
+    }
+
+    public double getPosition() {
+        return position;
     }
 
     @Override
@@ -113,10 +131,11 @@ public class VLCStatus {
                 "\nisPaused:    " + isPaused +
                 "\nisStopped:   " + isStopped +
                 "\nisLooping:   " + isLooping +
-                "\nisRandom:    " + isRandom;
+                "\nisRandom:    " + isRandom +
+                "\nPosition:    " + position;
 
         if(isPlaying || isPaused)
-            string += "\nCurrent Song: " + currentSong;
+            string += "\nCurrent Song: " + title;
 
         return string + "\n";
     }
@@ -125,6 +144,9 @@ public class VLCStatus {
         parseState(doc);
         parseLoop(doc);
         parseRandom(doc);
+        parsePosition(doc);
+        parseTime(doc);
+        parseLength(doc);
 
         if (isPlaying || isPaused) {
             parseCurrentSong(doc);
@@ -147,6 +169,21 @@ public class VLCStatus {
         }
     }
 
+    private void parsePosition(Document doc) {
+        Node node = doc.getElementsByTagName("position").item(0);
+        position = Double.parseDouble(node.getTextContent().toString());
+    }
+
+    private void parseTime(Document doc) {
+        Node node = doc.getElementsByTagName("time").item(0);
+        time = Integer.parseInt(node.getTextContent().toString());
+    }
+
+    private void parseLength(Document doc) {
+        Node node = doc.getElementsByTagName("length").item(0);
+        length = Integer.parseInt(node.getTextContent().toString());
+    }
+
     private void parseLoop(Document doc) {
         Node loop = doc.getElementsByTagName("loop").item(0);
         isLooping = loop.getTextContent().equals("true");
@@ -163,10 +200,20 @@ public class VLCStatus {
         NodeList infoNodes = meta.getElementsByTagName("info");
         for(int i = 0; i < infoNodes.getLength(); i++) {
             Element info = (Element) infoNodes.item(i);
-            if(info.getAttribute("name").equals("filename"))
-                currentSong = info.getTextContent();
+            if(info.getAttribute("name").equals("title"))
+                title = info.getTextContent();
+            if(info.getAttribute("name").equals("artist"))
+                artist = info.getTextContent();
             if(info.getAttribute("name").equals("artwork_url"))
                 artworkURL = info.getTextContent();
         }
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public int getLength() {
+        return length;
     }
 }

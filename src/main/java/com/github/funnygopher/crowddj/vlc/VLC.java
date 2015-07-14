@@ -1,5 +1,7 @@
 package com.github.funnygopher.crowddj.vlc;
 
+import com.github.funnygopher.crowddj.exceptions.NoVLCConnectionException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;

@@ -1,4 +1,6 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.managers;
+
+import com.github.funnygopher.crowddj.Property;
 
 import java.io.*;
 import java.util.Properties;

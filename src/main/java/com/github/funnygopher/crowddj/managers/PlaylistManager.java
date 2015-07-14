@@ -1,4 +1,8 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.managers;
+
+import com.github.funnygopher.crowddj.SearchParty;
+import com.github.funnygopher.crowddj.Song;
+import com.github.funnygopher.crowddj.exceptions.SongCreationException;
 
 import java.io.File;
 import java.util.ArrayList;
