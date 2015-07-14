@@ -1,5 +1,8 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.managers;
 
+import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.ObservableStatus;
+import com.github.funnygopher.crowddj.StatusObserver;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.concurrent.Task;
 

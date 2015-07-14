@@ -38,11 +38,17 @@
         <menus>
           <Menu mnemonicParsing="false" text="Playback">
             <items>
-              <MenuItem fx:id="miPlay" mnemonicParsing="false" text="Play" />
-                  <MenuItem fx:id="miPause" mnemonicParsing="false" text="Pause" />
+              <MenuItem fx:id="miPlayPause" mnemonicParsing="false" text="Play" />
                   <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
+                  <MenuItem fx:id="miNext" mnemonicParsing="false" text="Next" />
+                  <CheckMenuItem fx:id="cmiShuffle" mnemonicParsing="false" text="Shuffle" />
             </items>
           </Menu>
+            <Menu fx:id="mView" mnemonicParsing="false" text="View">
+               <items>
+                  <CheckMenuItem fx:id="cmiShowPlaylist" mnemonicParsing="false" text="Show Playlist" />
+               </items>
+            </Menu>
           <Menu fx:id="mTools" mnemonicParsing="false" text="Tools">
             <items>
                   <Menu fx:id="mVLCSettings" mnemonicParsing="false" text="VLC Settings">
@@ -102,12 +108,12 @@
             <ProgressBar fx:id="pbSongProgress" focusTraversable="false" layoutX="150.0" layoutY="181.0" minHeight="-Infinity" prefHeight="5.0" prefWidth="300.0" progress="1.0" AnchorPane.bottomAnchor="14.0" />
             <Label fx:id="lbSongTotalTime" layoutX="460.0" layoutY="176.0" text="00:00" textFill="#ffffff80" AnchorPane.bottomAnchor="8.0">
                <font>
-                  <Font name="Arial" size="13.0" />
+                  <Font name="Arial Bold" size="13.0" />
                </font>
             </Label>
             <Label fx:id="lbSongTime" alignment="CENTER_RIGHT" layoutX="107.0" layoutY="176.0" text="00:00" textAlignment="RIGHT" textFill="#ffffff80" AnchorPane.bottomAnchor="8.0">
                <font>
-                  <Font name="Arial" size="13.0" />
+                  <Font name="Arial Bold" size="13.0" />
                </font>
             </Label>
             <Button fx:id="bShuffle" layoutX="230.0" layoutY="119.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" AnchorPane.bottomAnchor="51.0" />

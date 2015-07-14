@@ -6,6 +6,7 @@ import com.github.funnygopher.crowddj.jetty.PlaylistHandler;
 import com.github.funnygopher.crowddj.managers.DatabaseManager;
 import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.managers.PropertyManager;
+import com.github.funnygopher.crowddj.managers.StatusManager;
 import com.github.funnygopher.crowddj.vlc.VLC;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import org.eclipse.jetty.server.Handler;

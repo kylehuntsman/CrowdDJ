@@ -7,7 +7,6 @@ import com.github.funnygopher.crowddj.managers.DatabaseManager;
 import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
@@ -48,10 +47,13 @@ public class CrowdDJController implements Initializable {
     MenuBar menuBar;
 
     @FXML
-    Menu mTools, mVLCSettings, mSetup;
+    Menu mView, mVLCSettings, mSetup;
 
     @FXML
-    MenuItem miStartVLC, miPlay, miPause, miStop;
+    MenuItem miStartVLC, miPlayPause, miStop, miNext;
+
+    @FXML
+    CheckMenuItem cmiShuffle, cmiShowPlaylist;
 
     @FXML
     TextField txtVLCPath;
@@ -79,6 +81,7 @@ public class CrowdDJController implements Initializable {
 
     CrowdDJ crowdDJ;
     PlaybackManager playbackManager;
+    MenuManager menuManager;
 
     public CrowdDJController(CrowdDJ crowdDJ) {
         this.crowdDJ = crowdDJ;
@@ -92,10 +95,12 @@ public class CrowdDJController implements Initializable {
 
         miStartVLC.setDisable(true);
         miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
+
         updatePlaylist();
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         playbackManager = new PlaybackManager(this);
+        menuManager = new MenuManager(this);
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
         // instance to the constructor of this class. This means the CrowdDJController is not tied to the form,
@@ -119,10 +124,6 @@ public class CrowdDJController implements Initializable {
                 startVLC();
             }
         });
-
-        miPlay.setOnAction(playbackManager.PLAY);
-        miPause.setOnAction(playbackManager.PAUSE);
-        miStop.setOnAction(playbackManager.STOP);
 
         // Initial setup for drag and drop
         pMusicList.setOnDragOver(new EventHandler<DragEvent>() {
@@ -226,6 +227,7 @@ public class CrowdDJController implements Initializable {
         addMenuLabel(mSetup, "Password", 2);
 
         crowdDJ.getStatusManager().registerObserver(playbackManager);
+        crowdDJ.getStatusManager().registerObserver(menuManager);
         crowdDJ.getStatusManager().start();
     }
 
@@ -301,12 +303,6 @@ public class CrowdDJController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public void updateLabels() {
-        VLCStatus status = crowdDJ.getStatus();
-        lbTitle.setText(status.getTitle());
-        lbArtist.setText(status.getArtist());
     }
 
     public PlaybackManager getPlaybackManager() {

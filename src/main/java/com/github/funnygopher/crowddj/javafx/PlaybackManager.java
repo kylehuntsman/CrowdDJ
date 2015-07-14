@@ -17,7 +17,7 @@ public class PlaybackManager implements StatusObserver {
 
     CrowdDJ crowdDJ;
     CrowdDJController controller;
-    final EventHandler PLAY, PAUSE, STOP, SHUFFLE, NEXT;
+    final EventHandler PLAY, PAUSE, STOP, NEXT, SHUFFLE;
 
     private Button play, pause, stop, shuffle, next;
     private Button[] playbackButtons, extraButtons;
@@ -39,8 +39,8 @@ public class PlaybackManager implements StatusObserver {
         PLAY = (event -> play());
         PAUSE = (event -> pause());
         STOP = (event -> stop());
-        SHUFFLE = (event -> shuffle());
         NEXT = (event -> next());
+        SHUFFLE = (event -> shuffle());
 
         this.play = controller.bPlay;
         this.pause = controller.bPause;
@@ -146,12 +146,12 @@ public class PlaybackManager implements StatusObserver {
         crowdDJ.getVLC().getController().stop();
     }
 
-    public void shuffle() {
-        crowdDJ.getVLC().getController().toggleRandom();
-    }
-
     public void next() {
         crowdDJ.getVLC().getController().next();
+    }
+
+    public void shuffle() {
+        crowdDJ.getVLC().getController().toggleRandom();
     }
 
     @Override
