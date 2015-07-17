@@ -57,6 +57,13 @@
             <artifactId>jooq-codegen</artifactId>
             <version>3.6.2</version>
         </dependency>
+
+        <!-- VLCj -->
+        <dependency>
+            <groupId>uk.co.caprica</groupId>
+            <artifactId>vlcj</artifactId>
+            <version>3.8.0</version>
+        </dependency>
     </dependencies>
 
     <build>

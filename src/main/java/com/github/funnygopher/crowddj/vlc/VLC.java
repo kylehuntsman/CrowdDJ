@@ -2,7 +2,6 @@ package com.github.funnygopher.crowddj.vlc;
 
 import com.github.funnygopher.crowddj.exceptions.NoVLCConnectionException;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -78,10 +77,6 @@ public class VLC {
      */
     public boolean start(String vlcPath) {
         if(getStatus().isConnected())
-            return false;
-
-        File vlcExe = new File(vlcPath);
-        if(!vlcExe.isFile())
             return false;
 
         String parameters = "\"" + vlcPath + "\"" +

@@ -1,13 +1,10 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.Property;
 import com.github.funnygopher.crowddj.StatusObserver;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
@@ -21,6 +18,7 @@ public class MenuManager implements StatusObserver {
     PlaybackManager playbackManager;
 
     private MenuItem playpause, stop, next;
+    private MenuItem addFiles, clearPlaylist;
     private CheckMenuItem shuffle, showPlaylist;
 
     public MenuManager(CrowdDJController controller) {
@@ -31,6 +29,9 @@ public class MenuManager implements StatusObserver {
         this.playpause = controller.miPlayPause;
         this.stop = controller.miStop;
         this.next = controller.miNext;
+
+        this.addFiles = controller.miAddFiles;
+
         this.shuffle = controller.cmiShuffle;
         this.showPlaylist = controller.cmiShowPlaylist;
 
@@ -45,27 +46,42 @@ public class MenuManager implements StatusObserver {
         next.setOnAction(playbackManager.NEXT);
         shuffle.setOnAction(playbackManager.SHUFFLE);
 
-        playpause.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                VLCStatus status = crowdDJ.getStatusManager().getStatus();
-                if(status.isPlaying()) {
-                    playpause.setText("Pause");
-                    playbackManager.pause();
-                }
+        playpause.setOnAction(event -> {
+            VLCStatus status = crowdDJ.getStatusManager().getStatus();
+            if (status.isPlaying()) {
+                playpause.setText("Pause");
+                playbackManager.pause();
+            }
 
-                if(status.isPaused() || status.isStopped()) {
-                    playpause.setText("Play");
-                    playbackManager.play();
-                }
+            if (status.isPaused() || status.isStopped()) {
+                playpause.setText("Play");
+                playbackManager.play();
             }
         });
 
         showPlaylist.selectedProperty().set(true);
-        showPlaylist.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                controller.pMusicList.setVisible(newValue);
+        showPlaylist.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            controller.pMusicList.setVisible(newValue);
+        });
+
+        String vlcPath = crowdDJ.getProperties().getStringProperty(Property.VLC_PATH);
+        controller.txtVLCPath.setText(vlcPath);
+
+        controller.txtVLCPath.textProperty().addListener((observable, oldValue, newValue) -> {
+            String alteredValue = newValue.replace("\\", "/");
+
+            boolean validPath = crowdDJ.isValidVLCPath(alteredValue);
+            if (validPath)
+                crowdDJ.setVLCPath(alteredValue);
+            controller.miStartVLC.setDisable(!validPath);
+        });
+    }
+
+    @Override
+    public void update(VLCStatus status) {
+        Platform.runLater(() -> {
+            if(status.isConnected()) {
+                updateMenuLabels(status);
             }
         });
     }
@@ -77,17 +93,5 @@ public class MenuManager implements StatusObserver {
         if(status.isPaused() || status.isStopped()) {
             playpause.setText("Play");
         }
-    }
-
-    @Override
-    public void update(VLCStatus status) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if(status.isConnected()) {
-                    updateMenuLabels(status);
-                }
-            }
-        });
     }
 }

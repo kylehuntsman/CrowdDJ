@@ -153,14 +153,38 @@ public class VLCController {
         }
     }
 
-    public VLCStatus toggleRandom() {
-		System.out.println("Toggling random playback.");
+    public VLCStatus clearPlaylist() {
+        System.out.println("Clearing playlist.");
 
-		// Attempts to send the GET request
+        // Attempts to send the GET request
+        try {
+            return sendGetRequest(vlc.STATUS, "pl_empty");
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not clear playlist. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
+        }
+    }
+
+    public VLCStatus toggleRandom() {
+        System.out.println("Toggling looping playback.");
+
+        // Attempts to send the GET request
         try {
             return sendGetRequest(vlc.STATUS, "pl_random");
         } catch (NoVLCConnectionException e) {
-			e.printError("Could not toggle random playback. Not connected to VLC media player.");
+            e.printError("Could not toggle random playback. Not connected to VLC media player.");
+            return VLCStatus.NO_CONNECTION;
+        }
+    }
+
+    public VLCStatus toggleLoop() {
+        System.out.println("Toggling random playback.");
+
+        // Attempts to send the GET request
+        try {
+            return sendGetRequest(vlc.STATUS, "pl_loop");
+        } catch (NoVLCConnectionException e) {
+            e.printError("Could not toggle looping playback. Not connected to VLC media player.");
             return VLCStatus.NO_CONNECTION;
         }
     }

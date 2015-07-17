@@ -8,7 +8,6 @@ import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.managers.PropertyManager;
 import com.github.funnygopher.crowddj.managers.StatusManager;
 import com.github.funnygopher.crowddj.vlc.VLC;
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -28,14 +27,7 @@ import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
 public class CrowdDJ {
 
     private VLC vlc;
-    private int port;
-
-    private String password;
     private Server server;
-
-    private String vlcPath;
-
-    private boolean validVLCPath;
 
     private CrowdDJController controller;
     private PropertyManager properties;
@@ -44,12 +36,6 @@ public class CrowdDJ {
     private StatusManager statusManager;
 
     public CrowdDJ() {
-        this(8081, "root");
-    }
-
-    public CrowdDJ(int port, String password) {
-        this.port = port;
-        this.password = password;
         this.controller = new CrowdDJController(this);
 
 		// Sets up the properties file
@@ -66,7 +52,6 @@ public class CrowdDJ {
         // Sets up the VLC connection
 		int vlcPort = properties.getIntProperty(Property.VLC_PORT);
 		String vlcPass = properties.getStringProperty(Property.VLC_PASSWORD);
-        vlcPath = properties.getStringProperty(Property.VLC_PATH);
         vlc = new VLC(vlcPort, vlcPass);
 
         // Sets up the status manager for a current VLC status
@@ -86,7 +71,8 @@ public class CrowdDJ {
             e.printStackTrace();
         }
 
-        boolean vlcStarted = vlc.start(vlcPath);
+        // Starts VLC
+        boolean vlcStarted = startVLC();
         if(vlcStarted) {
             // Adds the songs to VLC
             for (Song song : playlist.getItems()) {
@@ -96,6 +82,7 @@ public class CrowdDJ {
 
         // Starts the web server, telling it to look for playback commands
         try {
+            int port = properties.getIntProperty(Property.PORT);
             server = new Server(port);
 			ContextHandler playbackContext = new ContextHandler();
 			playbackContext.setContextPath("/playback");
@@ -140,32 +127,34 @@ public class CrowdDJ {
         return vlc;
     }
 
-    public VLCStatus getStatus() {
-        return statusManager.getStatus();
-    }
-
     public boolean isVLCConnected() {
         return vlc.getStatus().isConnected();
     }
 
     public boolean hasValidVLCPath() {
-        return validVLCPath;
+        String vlcPath = properties.getStringProperty(Property.VLC_PATH);
+        return isValidVLCPath(vlcPath);
+    }
+
+    public boolean isValidVLCPath(String vlcPath) {
+        if(!vlcPath.endsWith("vlc.exe"))
+            return false;
+
+        File vlc = new File(vlcPath);
+        if(!vlc.isFile())
+            return false;
+
+        return true;
     }
 
     public void setVLCPath(String vlcPath) {
-        File vlcExe = new File(vlcPath);
-        if(vlcExe.isFile()) {
-            validVLCPath = true;
-            this.vlcPath = vlcPath;
-        } else {
-            validVLCPath = false;
-        }
+        properties.setProperty(Property.VLC_PATH, vlcPath);
     }
 
     public boolean startVLC() {
-        if(validVLCPath) {
+        String vlcPath = properties.getStringProperty(Property.VLC_PATH);
+        if(isValidVLCPath(vlcPath))
             return vlc.start(vlcPath);
-        }
 
         return false;
     }

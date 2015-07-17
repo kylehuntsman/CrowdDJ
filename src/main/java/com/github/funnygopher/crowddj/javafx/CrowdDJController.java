@@ -9,11 +9,8 @@ import com.github.funnygopher.crowddj.vlc.VLCPlaylist;
 import com.github.funnygopher.crowddj.vlc.VLCPlaylistItem;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -47,19 +44,22 @@ public class CrowdDJController implements Initializable {
     MenuBar menuBar;
 
     @FXML
-    Menu mView, mVLCSettings, mSetup;
+    Menu mVLCSettings, mSetup;
 
     @FXML
-    MenuItem miStartVLC, miPlayPause, miStop, miNext;
+    MenuItem miPlayPause, miStop, miNext;
+    @FXML
+    MenuItem miStartVLC, miAddFiles, miClearPlaylist;
 
     @FXML
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
 
     @FXML
-    TextField txtVLCPath;
+    TextField txtPort, txtVLCPath;
 
     @FXML
     ListView lvPlaylist;
+    ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
 
     @FXML
     ImageView ivAlbumArt;
@@ -89,18 +89,13 @@ public class CrowdDJController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Initial values for fields and stuff
-        txtVLCPath.setText("C:/Program Files (x86)/VideoLAN/VLC/vlc.exe");
-        crowdDJ.setVLCPath(txtVLCPath.getText());
+        playbackManager = new PlaybackManager(this);
+        menuManager = new MenuManager(this);
 
-        miStartVLC.setDisable(true);
-        miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
+        // Initial values for fields and stuff
 
         updatePlaylist();
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
-
-        playbackManager = new PlaybackManager(this);
-        menuManager = new MenuManager(this);
 
         // We can't use SceneBuilder to set all of the actions, because we need to be able to pass our CrowdDJ
         // instance to the constructor of this class. This means the CrowdDJController is not tied to the form,
@@ -108,22 +103,14 @@ public class CrowdDJController implements Initializable {
         // SceneBuilder will not recognize @FXML annotated functions, hence all the manual setting
         // of actions.
 
-        txtVLCPath.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                String alteredValue = newValue.replace("\\", "/");
-                crowdDJ.setVLCPath(alteredValue);
-
-                miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
-            }
+        miClearPlaylist.setOnAction(event -> {
+            crowdDJ.getVLC().getController().clearPlaylist();
+            crowdDJ.getPlaylist().clear();
+            updateDatabase();
         });
 
-        miStartVLC.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                startVLC();
-            }
-        });
+        miStartVLC.setOnAction(event -> startVLC());
+        miStartVLC.setDisable(!crowdDJ.hasValidVLCPath());
 
         // Initial setup for drag and drop
         pMusicList.setOnDragOver(new EventHandler<DragEvent>() {
@@ -163,6 +150,7 @@ public class CrowdDJController implements Initializable {
             }
         });
 
+        lvPlaylist.setItems(songNames);
         // Sets the list items to show the song names
         lvPlaylist.setCellFactory(new Callback<ListView, ListCell>() {
             @Override
@@ -223,8 +211,6 @@ public class CrowdDJController implements Initializable {
 
         // Adds menu labels to the menus in the menu bar
         addMenuLabel(mVLCSettings, "VLC Executable Path", 0);
-        addMenuLabel(mSetup, "Port", 0);
-        addMenuLabel(mSetup, "Password", 2);
 
         crowdDJ.getStatusManager().registerObserver(playbackManager);
         crowdDJ.getStatusManager().registerObserver(menuManager);
@@ -245,12 +231,12 @@ public class CrowdDJController implements Initializable {
         }
     }
 
-    private void addMenuLabel(Menu menu, String text, int index) {
-        menu.getItems().add(index, new LabelSeparatorMenuItem(text));
+    private void play(int id) {
+        crowdDJ.getVLC().getController().play(id);
     }
 
-    public void play(int id) {
-        crowdDJ.getVLC().getController().play(id);
+    private void addMenuLabel(Menu menu, String text, int index) {
+        menu.getItems().add(index, new LabelSeparatorMenuItem(text));
     }
 
     public void startVLC() {
@@ -272,14 +258,15 @@ public class CrowdDJController implements Initializable {
         */
 
             VLCPlaylist vlcPlaylist = crowdDJ.getVLC().getPlaylist();
-            ObservableList<VLCPlaylistItem> songNames = FXCollections.observableArrayList();
-            vlcPlaylist.getItems().forEach(item -> songNames.add(item));
-            if(vlcPlaylist.size() > 0) {
-                lblDragAndDrop.setDisable(true);
-                lblDragAndDrop.setVisible(false);
-            }
-            lvPlaylist.setItems(songNames);
 
+            if(vlcPlaylist.size() != songNames.size()) {
+                songNames.clear();
+                vlcPlaylist.getItems().forEach(item -> songNames.add(item));
+                if(vlcPlaylist.size() > 0) {
+                    lblDragAndDrop.setDisable(true);
+                    lblDragAndDrop.setVisible(false);
+                }
+            }
         } catch (NoVLCConnectionException e) {
             e.printError("Could not fetch playlist. Not connected to VLC media player.");
         }

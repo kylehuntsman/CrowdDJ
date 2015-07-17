@@ -37,6 +37,10 @@ public class PlaylistManager {
 		songs.remove(song);
 	}
 
+	public void clear() {
+		songs.clear();
+	}
+
 	public SearchParty<Song> search(File file) {
 		for(Song song : songs) {
 			if(song.getFile().equals(file)) {

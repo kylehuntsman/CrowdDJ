@@ -29,7 +29,7 @@ public class StatusManager implements ObservableStatus {
                 while(true) {
                     status = crowdDJ.getVLC().getStatus();
                     notifyObservers();
-                    Thread.sleep(100);
+                    Thread.sleep(400);
                 }
             }
         };
@@ -44,6 +44,7 @@ public class StatusManager implements ObservableStatus {
         try {
             updateTask.cancel(true);
             updateThread.join();
+            updateThread.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

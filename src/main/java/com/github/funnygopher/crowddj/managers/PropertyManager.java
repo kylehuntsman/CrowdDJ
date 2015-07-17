@@ -39,6 +39,10 @@ public class PropertyManager {
 		properties.setProperty(key, value);
 	}
 
+	public void setProperty(Property property, String value) {
+		setProperty(property.getValue(), value);
+	}
+
 	private InputStream getPropertiesFileStream(String filename) {
 		InputStream input;
 

@@ -14,7 +14,7 @@
 <AnchorPane fx:id="apRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView fx:id="ivAlbumArt" fitHeight="600.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
-      <Rectangle fx:id="rectTopFade" arcHeight="5.0" arcWidth="5.0" height="200.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <Rectangle fx:id="rectTopFade" arcHeight="5.0" arcWidth="5.0" height="250.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <fill>
             <LinearGradient endX="1.0" endY="1.0" startX="1.0">
                <stops>
@@ -24,7 +24,7 @@
             </LinearGradient>
          </fill>
       </Rectangle>
-      <Rectangle fx:id="rectBottomFade" arcHeight="5.0" arcWidth="5.0" height="200.0" layoutY="408.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <Rectangle fx:id="rectBottomFade" arcHeight="5.0" arcWidth="5.0" height="250.0" layoutY="408.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <fill>
             <LinearGradient endX="1.0" endY="1.0" startX="1.0">
                <stops>
@@ -44,6 +44,12 @@
                   <CheckMenuItem fx:id="cmiShuffle" mnemonicParsing="false" text="Shuffle" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Playlist">
+              <items>
+                <MenuItem fx:id="miAddFiles" mnemonicParsing="false" text="Add Files" />
+                  <MenuItem fx:id="miClearPlaylist" mnemonicParsing="false" text="Clear Playlist" />
+              </items>
+            </Menu>
             <Menu fx:id="mView" mnemonicParsing="false" text="View">
                <items>
                   <CheckMenuItem fx:id="cmiShowPlaylist" mnemonicParsing="false" text="Show Playlist" />
@@ -63,20 +69,6 @@
                   </Menu>
             </items>
           </Menu>
-            <Menu fx:id="mSetup" mnemonicParsing="false" text="Setup">
-               <items>
-                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Port">
-                     <content>
-                        <TextField promptText="Port" />
-                     </content>
-                  </CustomMenuItem>
-                  <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Password">
-                     <content>
-                        <PasswordField promptText="Password" />
-                     </content>
-                  </CustomMenuItem>
-               </items>
-            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />

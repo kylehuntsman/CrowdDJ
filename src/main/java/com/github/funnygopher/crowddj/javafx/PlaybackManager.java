@@ -2,15 +2,14 @@ package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
 import com.github.funnygopher.crowddj.StatusObserver;
+import com.github.funnygopher.crowddj.javafx.buttons.Button;
+import com.github.funnygopher.crowddj.javafx.buttons.ToggleButton;
 import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
 public class PlaybackManager implements StatusObserver {
@@ -19,18 +18,14 @@ public class PlaybackManager implements StatusObserver {
     CrowdDJController controller;
     final EventHandler PLAY, PAUSE, STOP, NEXT, SHUFFLE;
 
-    private Button play, pause, stop, shuffle, next;
-    private Button[] playbackButtons, extraButtons;
+    private Button play, pause, stop;
+    private Button next;
+    private Button shuffle;
 
     private Text title, artist;
     private Label currTime, totalTime;
 
     private ProgressBar songProgress;
-
-    private final String playbackButtonStyle = "-fx-background-color: rgba(0,0,0,0);" +
-            "-fx-border-width: 2;" +
-            "-fx-border-radius: 15;";
-    private final String extraButtonStyle = "-fx-background-color: rgba(0,0,0,0)";
 
     public PlaybackManager(CrowdDJController controller) {
         this.crowdDJ = controller.crowdDJ;
@@ -42,14 +37,11 @@ public class PlaybackManager implements StatusObserver {
         NEXT = (event -> next());
         SHUFFLE = (event -> shuffle());
 
-        this.play = controller.bPlay;
-        this.pause = controller.bPause;
-        this.stop = controller.bStop;
-        playbackButtons = new Button[]{play, pause, stop};
-
-        this.shuffle = controller.bShuffle;
-        this.next = controller.bNext;
-        extraButtons = new Button[]{shuffle, next};
+        play = new Button(controller.bPlay,"/images/light/play-32.png", PLAY, "/css/button_playback.css");
+        pause = new Button(controller.bPause,"/images/light/pause-32.png", PAUSE, "/css/button_playback.css");
+        stop = new Button(controller.bStop,"/images/light/stop-32.png", STOP, "/css/button_playback.css");
+        next = new Button(controller.bNext, "/images/light/fast-forward-16.png", NEXT, "/css/button_passive.css");
+        shuffle = new ToggleButton(controller.bShuffle, "/images/light/shuffle-16.png", SHUFFLE, "/css/button_toggled_on.css", "/css/button_passive.css");
 
         this.title = controller.lbTitle;
         this.artist = controller.lbArtist;
@@ -59,79 +51,6 @@ public class PlaybackManager implements StatusObserver {
 
         this.currTime = controller.lbSongTime;
         this.totalTime = controller.lbSongTotalTime;
-
-        Image playIcon = new Image(getClass().getResourceAsStream("/images/light/play-32.png"));
-        Image pauseIcon = new Image(getClass().getResourceAsStream("/images/light/pause-32.png"));
-        Image stopIcon = new Image(getClass().getResourceAsStream("/images/light/stop-32.png"));
-        Image shuffleIcon = new Image(getClass().getResourceAsStream("/images/light/shuffle-16.png"));
-        Image nextIcon = new Image(getClass().getResourceAsStream("/images/light/fast-forward-16.png"));
-
-        play.setGraphic(new ImageView(playIcon));
-        pause.setGraphic(new ImageView(pauseIcon));
-        stop.setGraphic(new ImageView(stopIcon));
-        shuffle.setGraphic(new ImageView(shuffleIcon));
-        next.setGraphic(new ImageView(nextIcon));
-
-        play.setOnMouseClicked(PLAY);
-        pause.setOnMouseClicked(PAUSE);
-        stop.setOnMouseClicked(STOP);
-        shuffle.setOnMouseClicked(SHUFFLE);
-        next.setOnMouseClicked(NEXT);
-
-        // Setting initial style
-        for (Button button : playbackButtons)
-            button.setStyle(playbackButtonStyle + "-fx-border-color: gray");
-
-        for (Button extraButton : extraButtons) {
-            extraButton.setStyle(extraButtonStyle);
-            extraButton.getGraphic().setOpacity(.5);
-        }
-
-        // Set on mouse enter event
-        for (Button button : playbackButtons) {
-            button.setOnMouseEntered(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    button.setStyle(playbackButtonStyle + "-fx-border-color: white");
-                }
-            });
-        }
-
-        for (Button extraButton : extraButtons) {
-            extraButton.setOnMouseEntered(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    extraButton.getGraphic().setOpacity(1);
-                }
-            });
-        }
-
-        // Set on mouse exit event
-        for (Button button : playbackButtons) {
-            button.setOnMouseExited(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    button.setStyle(playbackButtonStyle + "-fx-border-color: gray");
-                }
-            });
-        }
-
-        for (Button extraButton : extraButtons) {
-            extraButton.setOnMouseExited(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    extraButton.getGraphic().setOpacity(.5);
-                }
-            });
-        }
-
-        shuffle.setOnMouseExited(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if(!crowdDJ.getStatusManager().getStatus().isRandom())
-                    shuffle.getGraphic().setOpacity(.5);
-            }
-        });
     }
 
     public void play() {
@@ -161,19 +80,21 @@ public class PlaybackManager implements StatusObserver {
             public void run() {
                 updatePlaybackButtons(status);
 
-                if(status.isConnected()) {
-                    if (status.getTitle() != null && !status.getTitle().equals(title.getText())) {
+                if (status.isConnected()) {
+                    if (status.getTitle() != null && status.getTitle().equals(title.getText())) {
                         updateAlbumArt();
                     }
 
-                    if(status.isPlaying())
-                        controller.apRoot.setStyle("-fx-background-color: black");
-
                     // Update the labels
-                    if(status.getTitle() != null) {
+                    if (status.getTitle() != null) {
                         title.setText(status.getTitle());
                         artist.setText(status.getArtist());
+                    } else {
+                        title.setText("CrowdDJ");
+                        artist.setText("Let The Crowd Choose");
                     }
+
+                    shuffle.update(status);
 
                     int time = status.getTime();
                     int totTime = status.getLength();
@@ -189,8 +110,11 @@ public class PlaybackManager implements StatusObserver {
 
     private void updateAlbumArt() {
         Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
-        if (albumArt == null)
-            return;
+        if (albumArt == null) {
+            controller.apRoot.setStyle("-fx-background-color: inherit");
+        } else {
+            controller.apRoot.setStyle("-fx-background-color: black");
+        }
 
         controller.ivAlbumArt.setImage(albumArt);
     }
@@ -202,32 +126,15 @@ public class PlaybackManager implements StatusObserver {
 
         if(!status.isConnected()) {
             stop.setVisible(true);
-            stop.setDisable(false);
+            return;
         }
+
         if(status.isPlaying()) {
-            play.setVisible(false);
             pause.setVisible(true);
-
-            pause.setDisable(false);
-        }
-        if(status.isPaused()) {
+        } else if(status.isPaused()) {
             play.setVisible(true);
-            pause.setVisible(false);
-
-            play.setDisable(false);
-            pause.setDisable(true);
-            stop.setDisable(false);
-        }
-        if(status.isStopped()) {
+        } else if(status.isStopped()) {
             play.setVisible(true);
-            pause.setVisible(false);
-
-            play.setDisable(false);
-            pause.setDisable(true);
-            stop.setDisable(true);
-        }
-        if(status.isRandom()) {
-            shuffle.getGraphic().setOpacity(1);
         }
     }
 }
