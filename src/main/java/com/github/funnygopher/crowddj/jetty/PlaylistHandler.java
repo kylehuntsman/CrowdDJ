@@ -1,7 +1,7 @@
 package com.github.funnygopher.crowddj.jetty;
 
+import com.github.funnygopher.crowddj.javafx.AudioPlayer;
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.managers.PlaylistManager;
 import com.github.funnygopher.crowddj.SearchParty;
 import com.github.funnygopher.crowddj.Song;
 import org.eclipse.jetty.server.Request;
@@ -29,17 +29,17 @@ public class PlaylistHandler extends AbstractHandler {
 		String fileURI = httpServletRequest.getParameter("vote");
 		if(fileURI != null) {
 			File songFile = new File(fileURI);
-			SearchParty<Song> party = crowdDJ.getPlaylist().search(songFile);
+			SearchParty<Song> party = crowdDJ.getController().getPlayer().search(songFile);
 			if(party.found()) {
 				Song song = party.rescue();
-				crowdDJ.getPlaylist().vote(song);
+				crowdDJ.getController().getPlayer().vote(song);
 			}
 		}
 
 		StringBuilder xmlBuilder = new StringBuilder();
-		PlaylistManager playlist = crowdDJ.getPlaylist();
+		AudioPlayer player = crowdDJ.getController().getPlayer();
 		xmlBuilder.append("<playlist>");
-		for(Song song : playlist.getItems()) {
+		for(Song song : player.getPlaylist()) {
 			xmlBuilder.append(song.toXML());
 		}
 		xmlBuilder.append("</playlist>");

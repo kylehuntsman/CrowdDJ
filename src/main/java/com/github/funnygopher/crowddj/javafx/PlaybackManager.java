@@ -1,26 +1,26 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.StatusObserver;
 import com.github.funnygopher.crowddj.javafx.buttons.Button;
 import com.github.funnygopher.crowddj.javafx.buttons.ToggleButton;
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.Image;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 
-public class PlaybackManager implements StatusObserver {
+public class PlaybackManager {
 
     CrowdDJ crowdDJ;
     CrowdDJController controller;
+    AudioPlayer player;
+
     final EventHandler PLAY, PAUSE, STOP, NEXT, SHUFFLE;
 
     private Button play, pause, stop;
     private Button next;
-    private Button shuffle;
+    private ToggleButton shuffle;
 
     private Text title, artist;
     private Label currTime, totalTime;
@@ -30,6 +30,7 @@ public class PlaybackManager implements StatusObserver {
     public PlaybackManager(CrowdDJController controller) {
         this.crowdDJ = controller.crowdDJ;
         this.controller = controller;
+        this.player = controller.getPlayer();
 
         PLAY = (event -> play());
         PAUSE = (event -> pause());
@@ -51,90 +52,72 @@ public class PlaybackManager implements StatusObserver {
 
         this.currTime = controller.lbSongTime;
         this.totalTime = controller.lbSongTotalTime;
+
+        play.setVisible(true);
+        pause.setVisible(false);
+        stop.setVisible(false);
+
+        shuffle.set(player.shuffleProperty().get());
+        player.shuffleProperty().addListener((observable, oldValue, newValue) -> {
+            shuffle.set(newValue);
+        });
     }
 
     public void play() {
-        crowdDJ.getVLC().getController().play();
+        player.play();
     }
 
     public void pause() {
-        crowdDJ.getVLC().getController().pause();
+        player.pause();
     }
 
     public void stop() {
-        crowdDJ.getVLC().getController().stop();
+        player.stop();
     }
 
     public void next() {
-        crowdDJ.getVLC().getController().next();
+        player.next();
     }
 
     public void shuffle() {
-        crowdDJ.getVLC().getController().toggleRandom();
+        player.shuffle();
     }
 
-    @Override
-    public void update(VLCStatus status) {
+    public void update(MediaPlayer.Status status) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                updatePlaybackButtons(status);
+                //int time = status.getTime();
+                //int totTime = status.getLength();
+                //currTime.setText(String.format("%02d:%02d", time / 60, time % 60));
+                //totalTime.setText(String.format("%02d:%02d", totTime / 60, totTime % 60));
 
-                if (status.isConnected()) {
-                    if (status.getTitle() != null && status.getTitle().equals(title.getText())) {
-                        updateAlbumArt();
-                    }
-
-                    // Update the labels
-                    if (status.getTitle() != null) {
-                        title.setText(status.getTitle());
-                        artist.setText(status.getArtist());
-                    } else {
-                        title.setText("CrowdDJ");
-                        artist.setText("Let The Crowd Choose");
-                    }
-
-                    shuffle.update(status);
-
-                    int time = status.getTime();
-                    int totTime = status.getLength();
-                    currTime.setText(String.format("%02d:%02d", time / 60, time % 60));
-                    totalTime.setText(String.format("%02d:%02d", totTime / 60, totTime % 60));
-
-                    double position = status.getPosition();
-                    songProgress.setProgress(position);
-                }
+                //double position = status.getPosition();
+                //songProgress.setProgress(position);
             }
         });
     }
 
-    private void updateAlbumArt() {
-        Image albumArt = crowdDJ.getVLC().getController().getAlbumArt();
-        if (albumArt == null) {
-            controller.apRoot.setStyle("-fx-background-color: inherit");
-        } else {
-            controller.apRoot.setStyle("-fx-background-color: black");
-        }
+    public void updatePlaybackButtons(MediaPlayer.Status status) {
+        System.out.println("Updating playback buttons\n" +
+                "\tStatus: " + status.toString());
 
-        controller.ivAlbumArt.setImage(albumArt);
-    }
+        Platform.runLater(() -> {
+            play.setVisible(false);
+            pause.setVisible(false);
+            stop.setVisible(false);
 
-    private void updatePlaybackButtons(VLCStatus status) {
-        play.setVisible(false);
-        pause.setVisible(false);
-        stop.setVisible(false);
-
-        if(!status.isConnected()) {
-            stop.setVisible(true);
-            return;
-        }
-
-        if(status.isPlaying()) {
-            pause.setVisible(true);
-        } else if(status.isPaused()) {
-            play.setVisible(true);
-        } else if(status.isStopped()) {
-            play.setVisible(true);
-        }
+            switch (status) {
+                case PLAYING:
+                    pause.setVisible(true);
+                    break;
+                case PAUSED:
+                    play.setVisible(true);
+                    break;
+                case STOPPED:
+                    play.setVisible(true);
+                    break;
+            }
+        });
     }
 }

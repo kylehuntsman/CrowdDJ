@@ -1,6 +1,12 @@
 package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.exceptions.SongCreationException;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
+import javafx.scene.image.Image;
+import javafx.scene.media.Media;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
@@ -20,6 +26,7 @@ public class Song {
 	private String artist;
 	private double duration;
 	private int votes;
+    private Image albumArt;
 
 	public Song(File file) throws SongCreationException {
 		this.file = file;
@@ -43,6 +50,10 @@ public class Song {
         }
     }
 
+	public String getFileURI() {
+		return "file:///" + getURI();
+	}
+
 	public String getTitle() {
 		return title;
 	}
@@ -59,6 +70,10 @@ public class Song {
 		return votes;
 	}
 
+    public Image getAlbumArt() {
+        return albumArt;
+    }
+
 	public String toXML() {
 		String xmlString = "<song>" +
 				"<title>" + title + "</title>" +
@@ -70,6 +85,10 @@ public class Song {
 		return xmlString;
         //return "<song title=\"" + title + "\" artist=\"" + artist + "\" votes=\"" + votes + "\" uri=\"" + getURI() + "\"/>";
 	}
+
+    private Media toMedia() {
+        return new Media(getFileURI());
+    }
 
 	public int vote() {
 		votes += 1;
@@ -109,5 +128,20 @@ public class Song {
 		} catch(IOException e) {
 			throw new SongCreationException(file, e);
 		}
-	}
+
+        try {
+            Mp3File song = new Mp3File(file);
+            if (song.hasId3v2Tag()) {
+                ID3v2 id3v2tag = song.getId3v2Tag();
+                byte[] imageData = id3v2tag.getAlbumImage();
+                albumArt = new Image(new ByteArrayInputStream(imageData));
+            }
+        } catch (UnsupportedTagException e) {
+            e.printStackTrace();
+        } catch (InvalidDataException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

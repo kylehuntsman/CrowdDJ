@@ -7,9 +7,6 @@ import java.util.Properties;
 
 public class PropertyManager {
 
-	public final String VLC_PATH = "C:/Program Files (x86)/VideoLAN/VLC/vlc.exe";
-	public final int VLC_PORT = 8080;
-	public final String VLC_PASSWORD = "toor";
 	public final int PORT = 8081;
 	public final String DB_USERNAME = DatabaseManager.USERNAME;
 	public final String DB_PASSWORD = DatabaseManager.PASSWORD;
@@ -96,11 +93,6 @@ public class PropertyManager {
 
 	private Properties getDefaultProperties() {
 		Properties properties = new Properties();
-
-		// Sets default values for VLC media server
-		properties.setProperty(Property.VLC_PATH.getValue(), VLC_PATH);
-		properties.setProperty(Property.VLC_PORT.getValue(), String.valueOf(VLC_PORT));
-		properties.setProperty(Property.VLC_PASSWORD.getValue(), VLC_PASSWORD);
 
 		// Sets default values for CrowdDJ
 		properties.setProperty(Property.PORT.getValue(), String.valueOf(PORT));

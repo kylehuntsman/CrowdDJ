@@ -58,11 +58,11 @@
             <version>3.6.2</version>
         </dependency>
 
-        <!-- VLCj -->
+        <!-- mp3agic for Album Art -->
         <dependency>
-            <groupId>uk.co.caprica</groupId>
-            <artifactId>vlcj</artifactId>
-            <version>3.8.0</version>
+            <groupId>com.mpatric</groupId>
+            <artifactId>mp3agic</artifactId>
+            <version>0.8.3</version>
         </dependency>
     </dependencies>
 

@@ -1,6 +1,5 @@
 package com.github.funnygopher.crowddj.javafx.buttons;
 
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.event.EventHandler;
 
 public class ToggleButton extends Button {
@@ -9,22 +8,23 @@ public class ToggleButton extends Button {
 
     public ToggleButton(javafx.scene.control.Button button, String graphicURL, EventHandler eventHandler, String toggleOnCss, String toggleOffCss) {
         super(button, graphicURL, eventHandler, toggleOffCss);
-        this.toggleOnCss = toggleOnCss;
-        this.toggleOffCss = toggleOffCss;
+        this.toggleOnCss = this.getClass().getResource(toggleOnCss).toExternalForm();
+        this.toggleOffCss = this.getClass().getResource(toggleOffCss).toExternalForm();
     }
 
-    @Override
-    public void update(VLCStatus status) {
-        super.update(status);
-        String css;
-        if(status.isRandom())
-            css = this.getClass().getResource(toggleOnCss).toExternalForm();
-        else
-            css = this.getClass().getResource(toggleOffCss).toExternalForm();
+    public void on() {
+        button.getStylesheets().clear();
+        button.getStylesheets().add(toggleOnCss);
+    }
 
-        if(!button.getStylesheets().contains(css)) {
-            button.getStylesheets().clear();
-            button.getStylesheets().add(css);
-        }
+    public void off() {
+        button.getStylesheets().clear();
+        button.getStylesheets().add(toggleOffCss);
+    }
+
+    public void set(boolean value) {
+        button.getStylesheets().clear();
+        String style = value ? toggleOnCss : toggleOffCss;
+        button.getStylesheets().add(style);
     }
 }

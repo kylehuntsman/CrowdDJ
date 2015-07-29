@@ -1,13 +1,14 @@
 package com.github.funnygopher.crowddj;
 
+import com.github.funnygopher.crowddj.javafx.AudioPlayer;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import javafx.application.Application;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -29,17 +30,16 @@ public class Main extends Application {
             loader.setController(controller);
             Parent root = loader.load();
 
+            Platform.setImplicitExit(true);
             Stage stage = new Stage();
-            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent event) {
-                    crowdDJ.getStatusManager().stop();
-                    crowdDJ.stopServer();
-                    try {
-                        Runtime.getRuntime().exec("taskkill /F /IM vlc.exe"); // This is potentially dangerous...
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            stage.setOnCloseRequest(windowEvent -> {
+                crowdDJ.stopServer();
+
+                AudioPlayer player = crowdDJ.getController().getPlayer();
+                MediaPlayer mediaPlayer = player.getCurrentMediaPlayer();
+                if(mediaPlayer != null) {
+                    //mediaPlayer.stop();
+                    mediaPlayer.dispose();
                 }
             });
 

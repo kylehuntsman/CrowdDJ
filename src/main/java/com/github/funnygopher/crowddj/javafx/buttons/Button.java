@@ -1,6 +1,5 @@
 package com.github.funnygopher.crowddj.javafx.buttons;
 
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
 import javafx.event.EventHandler;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,10 +19,6 @@ public class Button {
         button.setOnAction(eventHandler);
 
         button.getStylesheets().add(this.getClass().getResource(cssURL).toExternalForm());
-    }
-
-    public void update(VLCStatus status) {
-
     }
 
     public javafx.scene.control.Button getButton() {

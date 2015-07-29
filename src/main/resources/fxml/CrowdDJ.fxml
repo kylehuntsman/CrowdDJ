@@ -55,20 +55,7 @@
                   <CheckMenuItem fx:id="cmiShowPlaylist" mnemonicParsing="false" text="Show Playlist" />
                </items>
             </Menu>
-          <Menu fx:id="mTools" mnemonicParsing="false" text="Tools">
-            <items>
-                  <Menu fx:id="mVLCSettings" mnemonicParsing="false" text="VLC Settings">
-                    <items>
-                        <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="VLC Path">
-                           <content>
-                              <TextField fx:id="txtVLCPath" prefWidth="260.0" promptText="VLC Path" />
-                           </content>
-                        </CustomMenuItem>
-                        <MenuItem fx:id="miStartVLC" mnemonicParsing="false" text="Start VLC Media Player" />
-                    </items>
-                  </Menu>
-            </items>
-          </Menu>
+          <Menu fx:id="mTools" mnemonicParsing="false" text="Tools" />
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />

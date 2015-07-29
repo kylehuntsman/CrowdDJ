@@ -1,21 +1,19 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.Property;
-import com.github.funnygopher.crowddj.StatusObserver;
-import com.github.funnygopher.crowddj.vlc.VLCStatus;
-import javafx.application.Platform;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.media.MediaPlayer;
 
-public class MenuManager implements StatusObserver {
+public class MenuManager {
 
     CrowdDJ crowdDJ;
     CrowdDJController controller;
     PlaybackManager playbackManager;
+    AudioPlayer player;
 
     private MenuItem playpause, stop, next;
     private MenuItem addFiles, clearPlaylist;
@@ -25,6 +23,7 @@ public class MenuManager implements StatusObserver {
         this.crowdDJ = controller.crowdDJ;
         this.controller = controller;
         this.playbackManager = controller.getPlaybackManager();
+        this.player = controller.getPlayer();
 
         this.playpause = controller.miPlayPause;
         this.stop = controller.miStop;
@@ -46,14 +45,17 @@ public class MenuManager implements StatusObserver {
         next.setOnAction(playbackManager.NEXT);
         shuffle.setOnAction(playbackManager.SHUFFLE);
 
+        player.shuffleProperty().addListener((observable, oldValue, newValue) -> {
+            shuffle.setSelected(newValue);
+        });
+
         playpause.setOnAction(event -> {
-            VLCStatus status = crowdDJ.getStatusManager().getStatus();
-            if (status.isPlaying()) {
+            if(player.getStatus().equals(MediaPlayer.Status.PLAYING)) {
                 playpause.setText("Pause");
                 playbackManager.pause();
             }
 
-            if (status.isPaused() || status.isStopped()) {
+            if (player.getStatus().equals(MediaPlayer.Status.PLAYING) || player.getStatus().equals(MediaPlayer.Status.STOPPED)) {
                 playpause.setText("Play");
                 playbackManager.play();
             }
@@ -63,34 +65,13 @@ public class MenuManager implements StatusObserver {
         showPlaylist.selectedProperty().addListener((observable, oldValue, newValue) -> {
             controller.pMusicList.setVisible(newValue);
         });
-
-        String vlcPath = crowdDJ.getProperties().getStringProperty(Property.VLC_PATH);
-        controller.txtVLCPath.setText(vlcPath);
-
-        controller.txtVLCPath.textProperty().addListener((observable, oldValue, newValue) -> {
-            String alteredValue = newValue.replace("\\", "/");
-
-            boolean validPath = crowdDJ.isValidVLCPath(alteredValue);
-            if (validPath)
-                crowdDJ.setVLCPath(alteredValue);
-            controller.miStartVLC.setDisable(!validPath);
-        });
     }
 
-    @Override
-    public void update(VLCStatus status) {
-        Platform.runLater(() -> {
-            if(status.isConnected()) {
-                updateMenuLabels(status);
-            }
-        });
-    }
-
-    private void updateMenuLabels(VLCStatus status) {
-        if(status.isPlaying()) {
+    public void updatePlaybackButtons(MediaPlayer.Status status) {
+        if(status == MediaPlayer.Status.PLAYING) {
             playpause.setText("Pause");
         }
-        if(status.isPaused() || status.isStopped()) {
+        if(status == MediaPlayer.Status.PAUSED || status == MediaPlayer.Status.STOPPED) {
             playpause.setText("Play");
         }
     }
