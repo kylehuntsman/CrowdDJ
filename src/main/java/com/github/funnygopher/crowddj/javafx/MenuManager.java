@@ -53,9 +53,7 @@ public class MenuManager {
             if(player.getStatus().equals(MediaPlayer.Status.PLAYING)) {
                 playpause.setText("Pause");
                 playbackManager.pause();
-            }
-
-            if (player.getStatus().equals(MediaPlayer.Status.PLAYING) || player.getStatus().equals(MediaPlayer.Status.STOPPED)) {
+            } else if (player.getStatus().equals(MediaPlayer.Status.PAUSED) || player.getStatus().equals(MediaPlayer.Status.STOPPED)) {
                 playpause.setText("Play");
                 playbackManager.play();
             }
