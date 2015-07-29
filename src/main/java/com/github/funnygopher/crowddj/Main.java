@@ -38,7 +38,7 @@ public class Main extends Application {
                 AudioPlayer player = crowdDJ.getController().getPlayer();
                 MediaPlayer mediaPlayer = player.getCurrentMediaPlayer();
                 if(mediaPlayer != null) {
-                    //mediaPlayer.stop();
+                    mediaPlayer.stop();
                     mediaPlayer.dispose();
                 }
             });
