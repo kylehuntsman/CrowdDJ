@@ -15,7 +15,7 @@ public class AnybodyHomeHandler extends AbstractHandler {
         httpServletResponse.setContentType("text/html; charset=UTF-8");
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-        httpServletResponse.getWriter().println("I'm Home!");
+        httpServletResponse.getWriter().print("I'm Home!");
         request.setHandled(true);
     }
 }
