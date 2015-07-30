@@ -1,6 +1,7 @@
 package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
+import com.github.funnygopher.crowddj.jetty.AnybodyHomeHandler;
 import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
 import com.github.funnygopher.crowddj.jetty.PlaylistHandler;
 import com.github.funnygopher.crowddj.managers.DatabaseManager;
@@ -66,8 +67,12 @@ public class CrowdDJ {
 			playlistContext.setContextPath("/playlist");
 			playlistContext.setHandler(new PlaylistHandler(this));
 
+            ContextHandler anybodyHomeContext = new ContextHandler();
+            anybodyHomeContext.setContextPath("/anybodyhome");
+            anybodyHomeContext.setHandler(new AnybodyHomeHandler());
+
 			HandlerList handlers = new HandlerList();
-			handlers.setHandlers(new Handler[]{playbackContext, playlistContext});
+			handlers.setHandlers(new Handler[]{playbackContext, playlistContext, anybodyHomeContext});
 			server.setHandler(handlers);
 
 			server.start();
