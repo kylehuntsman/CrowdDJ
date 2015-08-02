@@ -7,14 +7,11 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class Main extends Application {
-
-    private static CrowdDJ crowdDJ;
 
     public static void main(String args[]) {
         launch(args);
@@ -34,13 +31,8 @@ public class Main extends Application {
             Stage stage = new Stage();
             stage.setOnCloseRequest(windowEvent -> {
                 crowdDJ.stopServer();
-
-                AudioPlayer player = crowdDJ.getController().getPlayer();
-                MediaPlayer mediaPlayer = player.getCurrentMediaPlayer();
-                if(mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.dispose();
-                }
+                AudioPlayer player = crowdDJ.getPlayer();
+                player.dispose();
             });
 
             stage.setTitle("CrowdDJ");

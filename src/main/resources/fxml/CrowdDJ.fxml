@@ -63,10 +63,10 @@
           </Menu>
         </menus>
       </MenuBar>
-      <AnchorPane fx:id="pMusicList" layoutX="14.0" layoutY="36.0" prefHeight="350.0" prefWidth="200.0" AnchorPane.bottomAnchor="214.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="36.0">
+      <AnchorPane fx:id="pMusicList" layoutX="14.0" layoutY="36.0" prefHeight="350.0" prefWidth="570.0" AnchorPane.bottomAnchor="214.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="36.0">
          <children>
-            <ListView fx:id="lvPlaylist" focusTraversable="false" prefHeight="266.0" prefWidth="200.0" style="-fx-opacity: 80%;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <Label fx:id="lblDragAndDrop" alignment="CENTER" layoutX="48.0" layoutY="108.0" prefHeight="51.0" prefWidth="104.0" text="Drag-and-drop &#10;files music here &#10;to import" textAlignment="CENTER" AnchorPane.bottomAnchor="107.0" AnchorPane.topAnchor="108.0" />
+            <TableView fx:id="tblPlaylist" prefHeight="350.0" prefWidth="570.0" />
+            <Label fx:id="lblDragAndDrop" alignment="CENTER" layoutX="48.0" layoutY="108.0" prefHeight="51.0" prefWidth="104.0" text="Drag-and-drop &#10;files music here &#10;to import" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="107.0" AnchorPane.topAnchor="108.0" />
          </children>
       </AnchorPane>
       <AnchorPane layoutY="313.0" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

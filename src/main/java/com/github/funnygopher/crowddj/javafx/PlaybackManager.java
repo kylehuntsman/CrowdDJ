@@ -30,7 +30,7 @@ public class PlaybackManager {
     public PlaybackManager(CrowdDJController controller) {
         this.crowdDJ = controller.crowdDJ;
         this.controller = controller;
-        this.player = controller.getPlayer();
+        this.player = crowdDJ.getPlayer();
 
         PLAY = (event -> play());
         PAUSE = (event -> pause());

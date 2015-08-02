@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.exceptions;
+package com.github.funnygopher.crowddj.playlist;
 
 import java.io.File;
 

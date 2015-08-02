@@ -1,6 +1,4 @@
-package com.github.funnygopher.crowddj.managers;
-
-import com.github.funnygopher.crowddj.Property;
+package com.github.funnygopher.crowddj.util;
 
 import java.io.*;
 import java.util.Properties;
@@ -8,8 +6,8 @@ import java.util.Properties;
 public class PropertyManager {
 
 	public final int PORT = 8081;
-	public final String DB_USERNAME = DatabaseManager.USERNAME;
-	public final String DB_PASSWORD = DatabaseManager.PASSWORD;
+	public final String DB_USERNAME = "sa";
+	public final String DB_PASSWORD = "";
 
 	private Properties properties;
 	private String filename;

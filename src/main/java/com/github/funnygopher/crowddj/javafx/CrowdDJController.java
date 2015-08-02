@@ -1,34 +1,28 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.Song;
-import com.github.funnygopher.crowddj.managers.DatabaseManager;
+import com.github.funnygopher.crowddj.playlist.Song;
+import com.github.funnygopher.crowddj.playlist.SongModel;
+import com.github.funnygopher.crowddj.database.Database;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.*;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 
 import java.io.File;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
-
-import static com.github.funnygopher.crowddj.jooq.Tables.PLAYLIST;
 
 public class CrowdDJController implements Initializable {
 
@@ -43,6 +37,7 @@ public class CrowdDJController implements Initializable {
 
     @FXML
     MenuItem miPlayPause, miStop, miNext;
+
     @FXML
     MenuItem miAddFiles, miClearPlaylist;
 
@@ -50,7 +45,7 @@ public class CrowdDJController implements Initializable {
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
 
     @FXML
-    ListView lvPlaylist;
+    TableView tblPlaylist;
 
     @FXML
     ImageView ivAlbumArt;
@@ -71,13 +66,11 @@ public class CrowdDJController implements Initializable {
     ProgressBar pbSongProgress;
 
     CrowdDJ crowdDJ;
-    AudioPlayer player;
     PlaybackManager playbackManager;
     MenuManager menuManager;
 
     public CrowdDJController(CrowdDJ crowdDJ) {
         this.crowdDJ = crowdDJ;
-        player = new AudioPlayer(this, new ArrayList<Song>());
     }
 
     @Override
@@ -89,9 +82,25 @@ public class CrowdDJController implements Initializable {
         menuManager = new MenuManager(this);
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
         miClearPlaylist.setOnAction(event -> {
-            player.clearPlaylist();
+            crowdDJ.getPlaylist().clear();
             updateDatabase();
         });
+
+        // Setting up the playlist table
+        TableColumn playlistTitle = new TableColumn("Title");
+        TableColumn playlistArtist = new TableColumn("Artist");
+
+        playlistTitle.setMinWidth(100);
+        playlistArtist.setMinWidth(100);
+
+        playlistTitle.setCellValueFactory(
+                new PropertyValueFactory<SongModel, String>("title")
+        );
+        playlistArtist.setCellValueFactory(
+                new PropertyValueFactory<SongModel, String>("artist")
+        );
+        tblPlaylist.setItems(crowdDJ.getPlaylist().getObservableList());
+        tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist);
 
         // Initial setup for drag and drop
         pMusicList.setOnDragOver(new EventHandler<DragEvent>() {
@@ -126,38 +135,22 @@ public class CrowdDJController implements Initializable {
                 }
 
                 event.consume();
-                updatePlaylist();
                 updateDatabase();
             }
         });
 
-        // Sets the list items to show the song names
-        lvPlaylist.setCellFactory(new Callback<ListView, ListCell>() {
-            @Override
-            public ListCell call(ListView param) {
-                ListCell<Song> cell = new ListCell<Song>() {
-                    @Override
-                    protected void updateItem(Song item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
-                            setText(item.getTitle());
-                        }
-                    }
-                };
-                return cell;
-            }
-        });
-
+        /*
         // When the playlist is double clicked, play the selected song
-        lvPlaylist.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                Song currentItem = (Song) lvPlaylist.getSelectionModel().getSelectedItem();
-                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-                    player.play(currentItem);
+        tblPlaylist.setRowFactory(tableView -> {
+            TableRow<Song> row = new TableRow<Song>();
+            row.setOnMouseClicked(mouseEvent -> {
+                if (mouseEvent.getClickCount() == 2 && (!row.isEmpty())) {
+                    crowdDJ.getPlayer().play(row.getItem());
                 }
-            }
+            });
+            return null;
         });
+        */
 
         // The listener for resizing the window, changes the size of the album art
         InvalidationListener resizeListener = new InvalidationListener() {
@@ -187,48 +180,15 @@ public class CrowdDJController implements Initializable {
 
         rectTopFade.widthProperty().bind(apRoot.widthProperty());
         rectBottomFade.widthProperty().bind(apRoot.widthProperty());
-
-        updatePlaylist();
     }
 
     public void addFile(File file) {
-        if(file.isDirectory()) {
-            for (File fileInDir : file.listFiles()) {
-                addFile(fileInDir);
-            }
-        } else {
-			player.add(file);
-        }
-    }
-
-    private void updatePlaylist() {
-        //Updates the playlist listview with the names of the songs
-        ObservableList<Song> songTitles = FXCollections.observableArrayList();
-        player.getPlaylist().forEach(song -> songTitles.add(song));
-        if(player.getPlaylist().size() > 0) {
-            lblDragAndDrop.setDisable(true);
-            lblDragAndDrop.setVisible(false);
-        }
-        lvPlaylist.setItems(songTitles);
+        crowdDJ.getPlaylist().add(file);
     }
 
     public void updateDatabase() {
-		DatabaseManager database = crowdDJ.getDatabase();
-
-        // Updates the PLAYLIST table in the database
-        try (Connection conn = database.getConnection()) {
-            DSLContext db = DSL.using(conn);
-
-            // Drop the table and recreate to clear the table. There's probably a better way to do this...
-            db.execute("DROP TABLE PLAYLIST");
-            db.execute(database.CREATE_PLAYLIST_TABLE);
-
-            for (Song song : player.getPlaylist()) {
-                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(song.getFile().getPath()).returning().fetch();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+		Database database = crowdDJ.getDatabase();
+        crowdDJ.getPlaylist().updateDbTable(database);
     }
 
     public void setSongInformation(Song song) {
@@ -260,9 +220,5 @@ public class CrowdDJController implements Initializable {
 
     public PlaybackManager getPlaybackManager() {
         return playbackManager;
-    }
-
-    public AudioPlayer getPlayer() {
-        return player;
     }
 }

@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.util;
 
 /**
  * The <code>SearchParty</code> class is a utility class for detecting whether or not a list contains an object. Instead

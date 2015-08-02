@@ -23,7 +23,7 @@ public class MenuManager {
         this.crowdDJ = controller.crowdDJ;
         this.controller = controller;
         this.playbackManager = controller.getPlaybackManager();
-        this.player = controller.getPlayer();
+        this.player = crowdDJ.getPlayer();
 
         this.playpause = controller.miPlayPause;
         this.stop = controller.miStop;
@@ -51,10 +51,8 @@ public class MenuManager {
 
         playpause.setOnAction(event -> {
             if(player.getStatus().equals(MediaPlayer.Status.PLAYING)) {
-                playpause.setText("Pause");
                 playbackManager.pause();
             } else if (player.getStatus().equals(MediaPlayer.Status.PAUSED) || player.getStatus().equals(MediaPlayer.Status.STOPPED)) {
-                playpause.setText("Play");
                 playbackManager.play();
             }
         });

@@ -1,12 +1,10 @@
-package com.github.funnygopher.crowddj;
+package com.github.funnygopher.crowddj.playlist;
 
-import com.github.funnygopher.crowddj.exceptions.SongCreationException;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 import javafx.scene.image.Image;
-import javafx.scene.media.Media;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
@@ -83,12 +81,7 @@ public class Song {
 				"</song>";
 
 		return xmlString;
-        //return "<song title=\"" + title + "\" artist=\"" + artist + "\" votes=\"" + votes + "\" uri=\"" + getURI() + "\"/>";
 	}
-
-    private Media toMedia() {
-        return new Media(getFileURI());
-    }
 
 	public int vote() {
 		votes += 1;
@@ -108,7 +101,11 @@ public class Song {
 
 			title = metadata.get("title");
 			artist = metadata.get("creator");
-			//duration = Double.parseDouble(metadata.get("xmpDM:duration"));
+
+			String durString = metadata.get("xmpDM:duration");
+			if(durString != null) {
+				duration = Double.parseDouble(metadata.get("xmpDM:duration"));
+			}
 
 			if(title == null) {
 				String title = file.getName();
