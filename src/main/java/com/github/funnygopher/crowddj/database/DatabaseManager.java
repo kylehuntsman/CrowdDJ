@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class SimpleDatabase implements Database {
+public class DatabaseManager {
 
 	private String url;
 	private String username;
@@ -18,7 +18,7 @@ public class SimpleDatabase implements Database {
             "FILEPATH VARCHAR(255) NOT NULL" +
             ");";
 
-	public SimpleDatabase(String url, String username, String password) {
+	public DatabaseManager(String url, String username, String password) {
 		this.url = url;
 		this.username = username;
 		this.password = password;

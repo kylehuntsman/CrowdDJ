@@ -1,7 +1,6 @@
 package com.github.funnygopher.crowddj.jetty;
 
-import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.javafx.PlaybackManager;
+import com.github.funnygopher.crowddj.player.Player;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -12,10 +11,10 @@ import java.io.IOException;
 
 public class PlaybackHandler extends AbstractHandler {
 
-    private CrowdDJ crowdDJ;
+    private Player player;
 
-    public PlaybackHandler(CrowdDJ crowdDJ) {
-		this.crowdDJ = crowdDJ;
+    public PlaybackHandler(Player player) {
+		this.player = player;
     }
 
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
@@ -23,18 +22,17 @@ public class PlaybackHandler extends AbstractHandler {
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
 		String command = httpServletRequest.getParameter("command");
-		PlaybackManager playbackManager = crowdDJ.getController().getPlaybackManager();
 		switch (command) {
 			case "play":
-                playbackManager.play();
+                player.play();
 				break;
 
 			case "pause":
-				playbackManager.pause();
+				player.pause();
 				break;
 
 			case "stop":
-				playbackManager.stop();
+				player.stop();
 				break;
 
 			default:

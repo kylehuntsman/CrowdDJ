@@ -5,16 +5,11 @@ import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 import javafx.scene.image.Image;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.mp3.Mp3Parser;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class Song {
@@ -89,55 +84,22 @@ public class Song {
 	}
 
 	private void getMp3Information(File file) throws SongCreationException {
-		try {
-			InputStream input = new FileInputStream(file);
-			ContentHandler handler = new DefaultHandler();
-			Metadata metadata = new Metadata();
-			Parser parser = new Mp3Parser();
-			ParseContext parseCtx = new ParseContext();
-
-			parser.parse(input, handler, metadata, parseCtx);
-			input.close();
-
-			title = metadata.get("title");
-			artist = metadata.get("creator");
-
-			String durString = metadata.get("xmpDM:duration");
-			if(durString != null) {
-				duration = Double.parseDouble(metadata.get("xmpDM:duration"));
-			}
-
-			if(title == null) {
-				String title = file.getName();
-				if(title.endsWith(".mp3")) {
-					this.title = title.substring(0, title.length() - 4);
-				}
-			}
-			if(artist == null) {
-				artist = "";
-			}
-		} catch(FileNotFoundException e) {
-			throw new SongCreationException(file, e);
-		} catch(TikaException e) {
-			throw new SongCreationException(file, e);
-		} catch(SAXException e) {
-			throw new SongCreationException(file, e);
-		} catch(IOException e) {
-			throw new SongCreationException(file, e);
-		}
-
         try {
             Mp3File song = new Mp3File(file);
             if (song.hasId3v2Tag()) {
                 ID3v2 id3v2tag = song.getId3v2Tag();
+                title = id3v2tag.getTitle();
+                artist = id3v2tag.getArtist();
+                duration = id3v2tag.getLength();
+
                 byte[] imageData = id3v2tag.getAlbumImage();
-                albumArt = new Image(new ByteArrayInputStream(imageData));
+				if(imageData != null)
+                	albumArt = new Image(new ByteArrayInputStream(imageData));
+				else {
+					albumArt = null;
+				}
             }
-        } catch (UnsupportedTagException e) {
-            e.printStackTrace();
-        } catch (InvalidDataException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (UnsupportedTagException | InvalidDataException | IOException e) {
             e.printStackTrace();
         }
     }

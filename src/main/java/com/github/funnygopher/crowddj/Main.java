@@ -1,6 +1,5 @@
 package com.github.funnygopher.crowddj;
 
-import com.github.funnygopher.crowddj.javafx.AudioPlayer;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -30,9 +29,9 @@ public class Main extends Application {
             Platform.setImplicitExit(true);
             Stage stage = new Stage();
             stage.setOnCloseRequest(windowEvent -> {
-                crowdDJ.stopServer();
-                AudioPlayer player = crowdDJ.getPlayer();
-                player.dispose();
+                crowdDJ.getServer().stop();
+                crowdDJ.getPlayer().turnOff();
+                crowdDJ.getPlaylist().updateDatabaseTable();
             });
 
             stage.setTitle("CrowdDJ");

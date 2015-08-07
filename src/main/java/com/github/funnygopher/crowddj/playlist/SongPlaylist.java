@@ -1,20 +1,25 @@
 package com.github.funnygopher.crowddj.playlist;
 
-import com.github.funnygopher.crowddj.database.Database;
+import com.github.funnygopher.crowddj.CrowdDJ;
+import com.github.funnygopher.crowddj.database.DatabaseManager;
 import com.github.funnygopher.crowddj.util.SearchParty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
 
 import static com.github.funnygopher.crowddj.database.jooq.Tables.PLAYLIST;
 
-public class SimplePlaylist implements Playlist {
+public class SongPlaylist implements Playlist {
 
     private ObservableList<Song> thePlaylist;
     public final String CREATE_PLAYLIST_TABLE =
@@ -23,8 +28,9 @@ public class SimplePlaylist implements Playlist {
                     "FILEPATH VARCHAR(255) NOT NULL" +
                     ");";
 
-    public SimplePlaylist(List<Song> thePlaylist) {
+    public SongPlaylist(List<Song> thePlaylist) {
         this.thePlaylist = FXCollections.observableArrayList(thePlaylist);
+        populateFromDatabase();
     }
 
     public void add(File file) {
@@ -74,7 +80,7 @@ public class SimplePlaylist implements Playlist {
         SearchParty<Song> party = search(file);
         if(party.found()) {
             Song song = party.rescue();
-            return song.vote();
+            return vote(song);
         }
         return 0;
     }
@@ -106,7 +112,8 @@ public class SimplePlaylist implements Playlist {
         return xml;
     }
 
-    public void updateDbTable(Database database) {
+    public void updateDatabaseTable() {
+        DatabaseManager database = CrowdDJ.getDatabase();
         try (Connection conn = database.getConnection()) {
             DSLContext db = DSL.using(conn);
 
@@ -122,7 +129,52 @@ public class SimplePlaylist implements Playlist {
         }
     }
 
-    public ObservableList<Song> getObservableList() {
+    public ObservableList<Song> getItems() {
         return thePlaylist;
+    }
+
+    public Song getNextItem(Song song) {
+        if(song == null) {
+            return thePlaylist.get(0);
+        }
+
+        int nextIndex = thePlaylist.indexOf(song) + 1;
+        if(nextIndex >= thePlaylist.size()) {
+            return null;
+        } else {
+            return thePlaylist.get(nextIndex);
+        }
+    }
+
+    public Song getRandomItem() {
+        Random rand = new Random(System.currentTimeMillis());
+        return thePlaylist.get(rand.nextInt(thePlaylist.size()));
+    }
+
+    public Song getItem(int index) {
+        return thePlaylist.get(index);
+    }
+
+    private void populateFromDatabase() {
+        DatabaseManager database = CrowdDJ.getDatabase();
+
+        // Takes each song saved in the PLAYLIST table and adds it to the player's playlist
+        try (Connection conn = database.getConnection()) {
+            DSLContext db = DSL.using(conn, SQLDialect.H2);
+            Result<Record> results = db.select().from(PLAYLIST).fetch();
+
+            for (Record result : results) {
+                String filepath = result.getValue(PLAYLIST.FILEPATH);
+                File file = new File(filepath);
+                try {
+                    Song song = new Song(file);
+                    thePlaylist.add(song);
+                } catch (SongCreationException e) {
+                    e.printError(e.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

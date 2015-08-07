@@ -15,18 +15,6 @@
             <version>4.12</version>
         </dependency>
 
-        <!-- Apache Tika for audio file parsing -->
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <version>1.8</version>
-        </dependency>
-
         <!-- Jetty web server for handling HTTP requests-->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -58,7 +46,7 @@
             <version>3.6.2</version>
         </dependency>
 
-        <!-- mp3agic for Album Art -->
+        <!-- mp3agic for audio file parsing -->
         <dependency>
             <groupId>com.mpatric</groupId>
             <artifactId>mp3agic</artifactId>

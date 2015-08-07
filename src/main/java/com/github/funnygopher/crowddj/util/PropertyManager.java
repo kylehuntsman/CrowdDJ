@@ -76,7 +76,7 @@ public class PropertyManager {
 		return properties;
 	}
 
-	private void savePropertiesFile(String filename, Properties properties) {
+	private static void savePropertiesFile(String filename, Properties properties) {
 		try {
 			File file = new File(filename);
 			OutputStream output = new FileOutputStream(file);
