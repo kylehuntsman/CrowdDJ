@@ -30,5 +30,5 @@ public interface Player {
     ReadOnlyDoubleProperty durationProperty();
     ReadOnlyObjectProperty<Song> currentSongProperty();
 
-    void turnOff();
+    void reset();
 }

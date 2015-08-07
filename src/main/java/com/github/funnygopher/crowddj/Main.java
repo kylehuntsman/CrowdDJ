@@ -30,7 +30,7 @@ public class Main extends Application {
             Stage stage = new Stage();
             stage.setOnCloseRequest(windowEvent -> {
                 crowdDJ.getServer().stop();
-                crowdDJ.getPlayer().turnOff();
+                crowdDJ.getPlayer().reset();
                 crowdDJ.getPlaylist().updateDatabaseTable();
             });
 

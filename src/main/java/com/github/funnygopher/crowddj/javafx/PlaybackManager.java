@@ -60,11 +60,17 @@ public class PlaybackManager {
             pause.setVisible(false);
             stop.setVisible(false);
 
-            if(player.isPlaying()) {
-                pause.setVisible(true);
-            } else if(player.isPaused()) {
-                play.setVisible(true);
-            } else if(player.isStopped()) {
+            try {
+                if (player.isPlaying()) {
+                    pause.setVisible(true);
+                } else if (player.isPaused()) {
+                    play.setVisible(true);
+                } else if (player.isStopped()) {
+                    play.setVisible(true);
+                } else {
+                    play.setVisible(true);
+                }
+            } catch(NullPointerException e) {
                 play.setVisible(true);
             }
         });

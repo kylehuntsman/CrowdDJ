@@ -70,7 +70,6 @@
                   <ContextMenu fx:id="tblPlaylistMenu">
                     <items>
                       <MenuItem fx:id="tblPlaylistMenuAddFiles" mnemonicParsing="false" text="Add Files..." />
-                        <MenuItem fx:id="tblPlaylistMenuRemove" mnemonicParsing="false" text="Remove Selected" />
                         <MenuItem fx:id="tblPlaylistMenuClear" mnemonicParsing="false" text="Clear Playlist" />
                     </items>
                   </ContextMenu>

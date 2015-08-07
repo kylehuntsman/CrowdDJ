@@ -32,6 +32,9 @@ public class AudioPlayer implements Player {
         // Sets up the current media player, and what to do when the media player changes
         currentPlayer = new SimpleObjectProperty<>(this, "currentPlayer");
         currentPlayer.addListener(((change, oldPlayer, newPlayer) -> {
+            if(newPlayer == null)
+                return;
+
             newPlayer.setVolume(volume);
             newPlayer.setOnError(() -> {
                 System.err.println("Media error occurred: " + newPlayer.getError());
@@ -113,11 +116,13 @@ public class AudioPlayer implements Player {
         return currentPlayer == null ? MediaPlayer.Status.STOPPED : currentPlayer.get().getStatus();
     }
 
-    public void turnOff() {
+    public void reset() {
         if(currentPlayer.get() != null) {
             currentPlayer.get().stop();
             currentPlayer.get().dispose();
         }
+        currentPlayer.set(null);
+        currentSong.set(null);
     }
 
     public void setOnPlay(Runnable runnable) {
@@ -155,15 +160,15 @@ public class AudioPlayer implements Player {
     }
 
     public boolean isPlaying() {
-        return currentPlayer.get().getStatus() == MediaPlayer.Status.PLAYING;
+        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.PLAYING;
     }
 
     public boolean isPaused() {
-        return currentPlayer.get().getStatus() == MediaPlayer.Status.PAUSED;
+        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.PAUSED;
     }
 
     public boolean isStopped() {
-        return currentPlayer.get().getStatus() == MediaPlayer.Status.STOPPED;
+        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.STOPPED;
     }
 
     // Returns the next song in the playlist, accounting for looping and shuffling

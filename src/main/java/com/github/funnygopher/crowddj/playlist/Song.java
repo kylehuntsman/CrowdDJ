@@ -1,20 +1,17 @@
 package com.github.funnygopher.crowddj.playlist;
 
-import com.mpatric.mp3agic.ID3v2;
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.Mp3File;
-import com.mpatric.mp3agic.UnsupportedTagException;
+import com.github.funnygopher.crowddj.util.XFile;
+import com.mpatric.mp3agic.*;
 import javafx.scene.image.Image;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URLEncoder;
 
 public class Song {
 
-	private File file;
+    private String filepath;
 	private String title;
 	private String artist;
 	private double duration;
@@ -22,24 +19,24 @@ public class Song {
     private Image albumArt;
 
 	public Song(File file) throws SongCreationException {
-		this.file = file;
+		this.filepath = file.getAbsolutePath();
 
 		if(!file.getName().endsWith(".mp3"))
             throw new SongCreationException(file);
 
-		getMp3Information(file);
+		getMp3Information(filepath);
 		votes = 0;
 	}
 
 	public File getFile() {
-		return file;
+		return new File(filepath);
 	}
 
 	public String getURI() {
         try {
-            return URLEncoder.encode(file.getPath(), "UTF-8").replaceAll("\\+", "%20").replaceAll("&", "%26");
+            return URLEncoder.encode(filepath, "UTF-8").replaceAll("\\+", "%20").replaceAll("&", "%26");
         } catch (UnsupportedEncodingException e) {
-            return String.valueOf(file.toURI());
+            return String.valueOf(getFile().toURI());
         }
     }
 
@@ -83,9 +80,9 @@ public class Song {
 		return votes;
 	}
 
-	private void getMp3Information(File file) throws SongCreationException {
+	private void getMp3Information(String filepath) throws SongCreationException {
         try {
-            Mp3File song = new Mp3File(file);
+            Mp3File song = new Mp3File(filepath);
             if (song.hasId3v2Tag()) {
                 ID3v2 id3v2tag = song.getId3v2Tag();
                 title = id3v2tag.getTitle();
@@ -100,6 +97,70 @@ public class Song {
 				}
             }
         } catch (UnsupportedTagException | InvalidDataException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changeAlbumArt(File file) {
+        String retagExtension = ".retag";
+        String backupExtension = ".bak";
+        try {
+            Mp3File mp3File = new Mp3File(filepath);
+
+            if (mp3File.hasId3v2Tag()) {
+                ID3Wrapper oldId3Wrapper = new ID3Wrapper(mp3File.getId3v1Tag(), mp3File.getId3v2Tag());
+                ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
+                newId3Wrapper.setTrack(oldId3Wrapper.getTrack());
+                newId3Wrapper.setArtist(oldId3Wrapper.getArtist());
+                newId3Wrapper.setTitle(oldId3Wrapper.getTitle());
+                newId3Wrapper.setArtist(oldId3Wrapper.getArtist());
+                newId3Wrapper.setAlbum(oldId3Wrapper.getAlbum());
+                newId3Wrapper.setYear(oldId3Wrapper.getYear());
+                newId3Wrapper.setGenre(oldId3Wrapper.getGenre());
+                newId3Wrapper.setComment(oldId3Wrapper.getComment());
+                newId3Wrapper.setComposer(oldId3Wrapper.getComposer());
+                newId3Wrapper.setOriginalArtist(oldId3Wrapper.getOriginalArtist());
+                newId3Wrapper.setCopyright(oldId3Wrapper.getCopyright());
+                newId3Wrapper.setUrl(oldId3Wrapper.getUrl());
+                newId3Wrapper.setEncoder(oldId3Wrapper.getEncoder());
+
+                // Sets the new image
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                BufferedImage img = ImageIO.read(file);
+                ImageIO.write(img, "jpg", baos);
+                baos.flush();
+                byte[] imageData = baos.toByteArray();
+                baos.close();
+
+                newId3Wrapper.setAlbumImage(imageData, "image/jpeg");
+                newId3Wrapper.getId3v2Tag().setPadding(true);
+
+                mp3File.setId3v1Tag(newId3Wrapper.getId3v1Tag());
+                mp3File.setId3v2Tag(newId3Wrapper.getId3v2Tag());
+                mp3File.save(filepath + retagExtension);
+
+                XFile originalFile = new XFile(filepath);
+                XFile backupFile = new XFile(filepath + backupExtension);
+                XFile retaggedFile = new XFile(filepath + retagExtension);
+                if (backupFile.exists()) {
+                    backupFile.delete();
+                }
+
+                originalFile.renameTo(backupFile);
+                retaggedFile.renameTo(originalFile);
+
+                if (backupFile.exists()) {
+                    backupFile.delete();
+                }
+
+
+                getMp3Information(filepath);
+            }
+        } catch (UnsupportedTagException | InvalidDataException | IOException e) {
+            e.printStackTrace();
+        } catch (NotSupportedException e) {
+            e.printStackTrace();
+        } catch (SongCreationException e) {
             e.printStackTrace();
         }
     }

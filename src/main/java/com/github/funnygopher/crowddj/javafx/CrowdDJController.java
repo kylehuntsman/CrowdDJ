@@ -6,6 +6,8 @@ import com.github.funnygopher.crowddj.playlist.Song;
 import com.github.funnygopher.crowddj.playlist.SongModel;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -16,8 +18,11 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class CrowdDJController implements Initializable {
@@ -41,7 +46,7 @@ public class CrowdDJController implements Initializable {
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
 
     @FXML
-    TableView tblPlaylist;
+    TableView<Song> tblPlaylist;
 
     @FXML
     ImageView ivAlbumArt;
@@ -61,10 +66,25 @@ public class CrowdDJController implements Initializable {
     @FXML
     ProgressBar pbSongProgress;
 
+    @FXML
+    MenuItem tblPlaylistMenuAddFiles, tblPlaylistMenuClear;
+
     private Player player;
     private Playlist playlist;
     private PlaybackManager playbackManager;
     private MenuManager menuManager;
+
+    public EventHandler addFilesEvent = event -> {
+        FileChooser fileChooser = new FileChooser();
+        List<File> list = fileChooser.showOpenMultipleDialog(apRoot.getScene().getWindow());
+        if (list != null) {
+            list.forEach(file -> playlist.add(file));
+        }
+    };
+    public EventHandler clearPlaylistEvent = event -> {
+        playlist.clear();
+        playlist.updateDatabaseTable();
+    };
 
     public CrowdDJController(Player player, Playlist playlist) {
         this.player = player;
@@ -103,6 +123,56 @@ public class CrowdDJController implements Initializable {
         tblPlaylist.setItems(playlist.getItems());
         tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist);
 
+        tblPlaylistMenuAddFiles.setOnAction(addFilesEvent);
+        tblPlaylistMenuClear.setOnAction(clearPlaylistEvent);
+
+        // Sets the actions when a row is selected
+        tblPlaylist.setRowFactory(tableView -> {
+            TableRow<Song> row = new TableRow<Song>();
+
+            EventHandler removeSelectedItem = event -> {
+                player.reset();
+                playlist.remove(row.getItem());
+                setSongInformation(null);
+            };
+
+            // Creates a context menu for the item
+            final ContextMenu contextMenu = new ContextMenu();
+            MenuItem removeItem = new MenuItem("Remove");
+            removeItem.setOnAction(removeSelectedItem);
+            MenuItem editAlbumArt = new MenuItem("Change Cover Art...");
+            editAlbumArt.setOnAction(actionEvent -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cover Art", "*.jpg"));
+                File file = fileChooser.showOpenDialog(apRoot.getScene().getWindow());
+
+                if(row.getItem() == player.currentSongProperty().get()) {
+                    player.reset();
+                    setSongInformation(null);
+                }
+
+                if (file != null) {
+                    Song song = row.getItem();
+                    song.changeAlbumArt(file);
+                }
+            });
+            contextMenu.getItems().addAll(removeItem, editAlbumArt);
+
+
+            row.contextMenuProperty().bind(
+                    Bindings.when(Bindings.isNotNull(row.itemProperty()))
+                            .then(contextMenu)
+                            .otherwise((ContextMenu) null));
+
+            // Plays the song when the row is double clicked
+            row.setOnMouseClicked(mouseEvent -> {
+                if (mouseEvent.getClickCount() == 2 && (!row.isEmpty())) {
+                    player.play(row.getItem());
+                }
+            });
+            return row;
+        });
+
         // Initial setup for drag and drop
         pMusicList.setOnDragOver(dragEvent -> {
             Dragboard db = dragEvent.getDragboard();
@@ -131,17 +201,6 @@ public class CrowdDJController implements Initializable {
             }
 
             dragEvent.consume();
-        });
-
-        // When the playlist is double clicked, play the selected song
-        tblPlaylist.setRowFactory(tableView -> {
-            TableRow<Song> row = new TableRow<Song>();
-            row.setOnMouseClicked(mouseEvent -> {
-                if (mouseEvent.getClickCount() == 2 && (!row.isEmpty())) {
-                    player.play(row.getItem());
-                }
-            });
-            return row;
         });
 
         // The listener for resizing the window, changes the size of the album art
@@ -173,23 +232,25 @@ public class CrowdDJController implements Initializable {
     }
 
     private void setSongInformation(Song song) {
-        System.out.println("Updating song information\n" +
-                "\tTitle:  " + song.getTitle() + "\n" +
-                "\tArtist: " + song.getArtist() + "\n" +
-                "\tVotes:  " + song.getVotes() + "\n" +
-                "\tURI:    " + song.getURI());
-
         Platform.runLater(() -> {
-            lbTitle.setText(song.getTitle());
-            lbArtist.setText(song.getArtist());
-
-            if (song.getAlbumArt() == null) {
+            if(song == null) {
+                lbTitle.setText("CrowdDJ");
+                lbArtist.setText("Let The Crowd Choose");
                 apRoot.setStyle("-fx-background-color: inherit");
-            } else {
-                apRoot.setStyle("-fx-background-color: black");
-            }
 
-            ivAlbumArt.setImage(song.getAlbumArt());
+                ivAlbumArt.setImage(null);
+            } else {
+                lbTitle.setText(song.getTitle());
+                lbArtist.setText(song.getArtist());
+
+                if (song.getAlbumArt() == null) {
+                    apRoot.setStyle("-fx-background-color: inherit");
+                } else {
+                    apRoot.setStyle("-fx-background-color: black");
+                }
+
+                ivAlbumArt.setImage(song.getAlbumArt());
+            }
         });
     }
 }

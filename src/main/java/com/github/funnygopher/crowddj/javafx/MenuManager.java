@@ -29,6 +29,7 @@ public class MenuManager {
         this.shuffle = controller.cmiShuffle;
         this.showPlaylist = controller.cmiShowPlaylist;
 
+
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
 
         playpause.setAccelerator(new KeyCodeCombination(KeyCode.SPACE, KeyCombination.CONTROL_DOWN));
@@ -41,10 +42,10 @@ public class MenuManager {
         stop.setOnAction(event -> player.stop());
         next.setOnAction(event -> player.next());
         shuffle.setOnAction(event -> player.shuffle());
-        clearPlaylist.setOnAction(event -> {
-            playlist.clear();
-            playlist.updateDatabaseTable();
-        });
+
+        addFiles.setOnAction(controller.addFilesEvent);
+        clearPlaylist.setOnAction(controller.clearPlaylistEvent);
+
 
         player.shuffleProperty().addListener((observable, oldValue, newValue) -> {
             shuffle.setSelected(newValue);
