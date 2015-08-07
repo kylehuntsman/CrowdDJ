@@ -1,0 +1,54 @@
+/* Selected rows */
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected,
+.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell:filled:selected,
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
+.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell .tree-table-cell:selected {
+    -fx-background: lightgray;
+    -fx-table-cell-border-color: derive(lightgray, 20%);
+}
+/* Selected when control is not focused */
+.list-cell:filled:selected,
+.tree-cell:filled:selected,
+.table-row-cell:filled:selected,
+.tree-table-row-cell:filled:selected,
+.table-row-cell:filled > .table-cell:selected,
+.tree-table-row-cell:filled > .tree-table-cell:selected {
+    -fx-background: lightgray;
+    -fx-table-cell-border-color: derive(lightgray, 20%);
+}
+
+/* This is the area behind the column headers. An ideal place to specify background
+   and border colors for the whole area (not individual column-header's). */
+.table-view .column-header-background,
+.tree-table-view > .column-header-background {
+    -fx-background-color: #333333;
+    -fx-background-insets: 0, 1;
+}
+
+/* The column header row is made up of a number of column-header, one for each
+   TableColumn, and a 'filler' area that extends from the right-most column
+   to the edge of the tableview, or up to the 'column control' button. */
+.table-view .column-header,
+.tree-table-view .column-header,
+.table-view .filler,
+.tree-table-view .filler,
+.table-view > .column-header-background > .show-hide-columns-button,
+.tree-table-view > .column-header-background > .show-hide-columns-button,
+.table-view:constrained-resize .filler,
+.tree-table-view:constrained-resize .filler {
+    -fx-background-color: #333333;
+    -fx-background-insets: 0, 0 1 1 0, 1 2 2 1;
+    -fx-font-weight: bold;
+    -fx-size: 2em;
+    -fx-text-fill: -fx-selection-bar-text;
+    -fx-padding: 0.166667em;
+}
+
+/* The column header text */
+.table-view .column-header .label,
+.tree-table-view .column-header .label {
+    -fx-alignment: center;
+    -fx-text-fill: lightgray;
+}

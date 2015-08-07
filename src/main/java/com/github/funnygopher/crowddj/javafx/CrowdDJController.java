@@ -126,6 +126,7 @@ public class CrowdDJController implements Initializable {
         tblPlaylist.setItems(playlist.getItems());
         tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist);
         tblPlaylist.setOpacity(.75);
+        tblPlaylist.getStylesheets().add(getClass().getResource("/css/playlist_table.css").toExternalForm());
 
         tblPlaylistMenuAddFiles.setOnAction(addFilesEvent);
         tblPlaylistMenuClear.setOnAction(clearPlaylistEvent);

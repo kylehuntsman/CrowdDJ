@@ -31,6 +31,7 @@ public class MenuManager {
 
 
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
+        menuBar.getStylesheets().add(this.getClass().getResource("/css/dark_menubar.css").toExternalForm());
 
         playpause.setAccelerator(new KeyCodeCombination(KeyCode.SPACE, KeyCombination.CONTROL_DOWN));
         stop.setAccelerator(new KeyCodeCombination(KeyCode.ESCAPE));
