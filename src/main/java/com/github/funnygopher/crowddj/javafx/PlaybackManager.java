@@ -16,11 +16,7 @@ public class PlaybackManager {
     private Label currTime, totalTime;
     private ProgressBar songProgress;
 
-    private Player player;
-
     public PlaybackManager(CrowdDJController controller, Player player) {
-        this.player = player;
-
         play = new Button(controller.bPlay,"/images/light/play-32.png", event -> player.play(), "/css/button_playback.css");
         pause = new Button(controller.bPause,"/images/light/pause-32.png", event -> player.pause(), "/css/button_playback.css");
         stop = new Button(controller.bStop,"/images/light/stop-32.png", event -> player.stop(), "/css/button_playback.css");
@@ -53,8 +49,6 @@ public class PlaybackManager {
     }
 
     public void updatePlaybackButtons(Player player) {
-        System.out.println("Updating playback buttons");
-
         Platform.runLater(() -> {
             play.setVisible(false);
             pause.setVisible(false);

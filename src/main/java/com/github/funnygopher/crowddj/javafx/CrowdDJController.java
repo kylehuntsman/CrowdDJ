@@ -19,6 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.net.URL;
@@ -74,6 +75,8 @@ public class CrowdDJController implements Initializable {
     private PlaybackManager playbackManager;
     private MenuManager menuManager;
 
+    private Stage stage;
+
     public EventHandler addFilesEvent = event -> {
         FileChooser fileChooser = new FileChooser();
         List<File> list = fileChooser.showOpenMultipleDialog(apRoot.getScene().getWindow());
@@ -122,6 +125,7 @@ public class CrowdDJController implements Initializable {
         );
         tblPlaylist.setItems(playlist.getItems());
         tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist);
+        tblPlaylist.setOpacity(.75);
 
         tblPlaylistMenuAddFiles.setOnAction(addFilesEvent);
         tblPlaylistMenuClear.setOnAction(clearPlaylistEvent);
@@ -158,7 +162,6 @@ public class CrowdDJController implements Initializable {
             });
             contextMenu.getItems().addAll(removeItem, editAlbumArt);
 
-
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))
                             .then(contextMenu)
@@ -174,7 +177,7 @@ public class CrowdDJController implements Initializable {
         });
 
         // Initial setup for drag and drop
-        pMusicList.setOnDragOver(dragEvent -> {
+        apRoot.setOnDragOver(dragEvent -> {
             Dragboard db = dragEvent.getDragboard();
             if (db.hasFiles()) {
                 dragEvent.acceptTransferModes(TransferMode.ANY);
@@ -184,7 +187,7 @@ public class CrowdDJController implements Initializable {
         });
 
         // When the music is dropped onto the list, add all of the music to VLC
-        pMusicList.setOnDragDropped(dragEvent -> {
+        apRoot.setOnDragDropped(dragEvent -> {
             Dragboard db = dragEvent.getDragboard();
             boolean success = false;
 
@@ -229,6 +232,10 @@ public class CrowdDJController implements Initializable {
 
         rectTopFade.widthProperty().bind(apRoot.widthProperty());
         rectBottomFade.widthProperty().bind(apRoot.widthProperty());
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
     private void setSongInformation(Song song) {

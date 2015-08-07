@@ -23,6 +23,7 @@ public class Main extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrowdDJ.fxml"));
             CrowdDJController controller = crowdDJ.getController();
+            controller.setStage(primaryStage);
             loader.setController(controller);
             Parent root = loader.load();
 
@@ -34,7 +35,7 @@ public class Main extends Application {
                 crowdDJ.getPlaylist().updateDatabaseTable();
             });
 
-            stage.setTitle("CrowdDJ");
+            stage.setTitle("CrowdDJ - Let The Crowd Choose");
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();

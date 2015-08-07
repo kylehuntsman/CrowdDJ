@@ -104,25 +104,12 @@ public class Song {
     public void changeAlbumArt(File file) {
         String retagExtension = ".retag";
         String backupExtension = ".bak";
+
         try {
             Mp3File mp3File = new Mp3File(filepath);
 
             if (mp3File.hasId3v2Tag()) {
-                ID3Wrapper oldId3Wrapper = new ID3Wrapper(mp3File.getId3v1Tag(), mp3File.getId3v2Tag());
-                ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
-                newId3Wrapper.setTrack(oldId3Wrapper.getTrack());
-                newId3Wrapper.setArtist(oldId3Wrapper.getArtist());
-                newId3Wrapper.setTitle(oldId3Wrapper.getTitle());
-                newId3Wrapper.setArtist(oldId3Wrapper.getArtist());
-                newId3Wrapper.setAlbum(oldId3Wrapper.getAlbum());
-                newId3Wrapper.setYear(oldId3Wrapper.getYear());
-                newId3Wrapper.setGenre(oldId3Wrapper.getGenre());
-                newId3Wrapper.setComment(oldId3Wrapper.getComment());
-                newId3Wrapper.setComposer(oldId3Wrapper.getComposer());
-                newId3Wrapper.setOriginalArtist(oldId3Wrapper.getOriginalArtist());
-                newId3Wrapper.setCopyright(oldId3Wrapper.getCopyright());
-                newId3Wrapper.setUrl(oldId3Wrapper.getUrl());
-                newId3Wrapper.setEncoder(oldId3Wrapper.getEncoder());
+                ID3v2 tag = mp3File.getId3v2Tag();
 
                 // Sets the new image
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -132,27 +119,21 @@ public class Song {
                 byte[] imageData = baos.toByteArray();
                 baos.close();
 
-                newId3Wrapper.setAlbumImage(imageData, "image/jpeg");
-                newId3Wrapper.getId3v2Tag().setPadding(true);
-
-                mp3File.setId3v1Tag(newId3Wrapper.getId3v1Tag());
-                mp3File.setId3v2Tag(newId3Wrapper.getId3v2Tag());
+                tag.setAlbumImage(imageData, "image/jpeg");
+                mp3File.setId3v2Tag(tag);
                 mp3File.save(filepath + retagExtension);
 
                 XFile originalFile = new XFile(filepath);
                 XFile backupFile = new XFile(filepath + backupExtension);
                 XFile retaggedFile = new XFile(filepath + retagExtension);
-                if (backupFile.exists()) {
+                if (backupFile.exists())
                     backupFile.delete();
-                }
 
                 originalFile.renameTo(backupFile);
                 retaggedFile.renameTo(originalFile);
 
-                if (backupFile.exists()) {
+                if (backupFile.exists())
                     backupFile.delete();
-                }
-
 
                 getMp3Information(filepath);
             }
