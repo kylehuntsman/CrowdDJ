@@ -11,19 +11,22 @@ public class AudioPlayer implements Player {
     private final Playlist playlist;
     private double volume = .5;
 
+    private BooleanProperty playing, paused, stopped;
     private BooleanProperty shuffle, loop;
     private DoubleProperty currentTime, duration;
 
     private ObjectProperty<Song> currentSong;
     private ObjectProperty<MediaPlayer> currentPlayer;
 
-    private Runnable onPlay, onPause, onStop, onNext;
-
     public AudioPlayer(Playlist playlist) {
         this.playlist = playlist;
 
-        loop = new SimpleBooleanProperty(this, "loop", true);
+        playing = new SimpleBooleanProperty(this, "playing", false);
+        paused = new SimpleBooleanProperty(this, "paused", false);
+        stopped = new SimpleBooleanProperty(this, "stopped", true);
+
         shuffle = new SimpleBooleanProperty(this, "shuffle", false);
+        loop = new SimpleBooleanProperty(this, "loop", true);
         currentTime = new SimpleDoubleProperty(this, "currentTime", 0);
         duration = new SimpleDoubleProperty(this, "duration", 0);
 
@@ -35,6 +38,12 @@ public class AudioPlayer implements Player {
             if(newPlayer == null)
                 return;
 
+            newPlayer.statusProperty().addListener((obs, oldStatus, newStatus) -> {
+                playing.set(newStatus == MediaPlayer.Status.PLAYING);
+                paused.set(newStatus == MediaPlayer.Status.PAUSED);
+                stopped.set(newStatus == MediaPlayer.Status.STOPPED);
+            });
+
             newPlayer.setVolume(volume);
             newPlayer.setOnError(() -> {
                 System.err.println("Media error occurred: " + newPlayer.getError());
@@ -43,9 +52,6 @@ public class AudioPlayer implements Player {
             newPlayer.setOnEndOfMedia(() -> {
                 next();
             });
-            newPlayer.setOnPlaying(onPlay);
-            newPlayer.setOnPaused(onPause);
-            newPlayer.setOnStopped(onStop);
 
             // Synchronizes the media player's current time with this player's current time
             newPlayer.currentTimeProperty().addListener((duration, oldValue, newValue) -> {
@@ -97,10 +103,6 @@ public class AudioPlayer implements Player {
         }
         currentPlayer.set(nextPlayer);
 
-        if(onNext != null) {
-            onNext.run();
-        }
-
         play();
     }
 
@@ -112,10 +114,6 @@ public class AudioPlayer implements Player {
         shuffle.set(!shuffle.get());
     }
 
-    private MediaPlayer.Status getStatus() {
-        return currentPlayer == null ? MediaPlayer.Status.STOPPED : currentPlayer.get().getStatus();
-    }
-
     public void reset() {
         if(currentPlayer.get() != null) {
             currentPlayer.get().stop();
@@ -125,26 +123,12 @@ public class AudioPlayer implements Player {
         currentSong.set(null);
     }
 
-    public void setOnPlay(Runnable runnable) {
-        onPlay = runnable;
-    }
-    public void setOnPause(Runnable runnable) {
-        onPause = runnable;
-    }
-    public void setOnStop(Runnable runnable) {
-        onStop = runnable;
-    }
-
-    public void setOnNext(Runnable runnable) {
-        onNext = runnable;
+    public ReadOnlyBooleanProperty shuffleProperty() {
+        return shuffle;
     }
 
     public ReadOnlyBooleanProperty loopProperty() {
         return loop;
-    }
-
-    public ReadOnlyBooleanProperty shuffleProperty() {
-        return shuffle;
     }
 
     public ReadOnlyDoubleProperty currentTimeProperty() {
@@ -159,16 +143,18 @@ public class AudioPlayer implements Player {
         return currentSong;
     }
 
-    public boolean isPlaying() {
-        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.PLAYING;
+
+    public ReadOnlyBooleanProperty playingProperty() {
+        return playing;
     }
 
-    public boolean isPaused() {
-        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.PAUSED;
+    public ReadOnlyBooleanProperty pausedProperty() {
+        return paused;
+
     }
 
-    public boolean isStopped() {
-        return currentPlayer.get() != null && currentPlayer.get().getStatus() == MediaPlayer.Status.STOPPED;
+    public ReadOnlyBooleanProperty stoppedProperty() {
+        return stopped;
     }
 
     // Returns the next song in the playlist, accounting for looping and shuffling

@@ -23,7 +23,6 @@ public class Main extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrowdDJ.fxml"));
             CrowdDJController controller = crowdDJ.getController();
-            controller.setStage(primaryStage);
             loader.setController(controller);
             Parent root = loader.load();
 

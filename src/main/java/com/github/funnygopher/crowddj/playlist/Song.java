@@ -2,6 +2,7 @@ package com.github.funnygopher.crowddj.playlist;
 
 import com.github.funnygopher.crowddj.util.XFile;
 import com.mpatric.mp3agic.*;
+import javafx.beans.property.*;
 import javafx.scene.image.Image;
 
 import javax.imageio.ImageIO;
@@ -12,11 +13,12 @@ import java.net.URLEncoder;
 public class Song {
 
     private String filepath;
-	private String title;
-	private String artist;
-	private double duration;
-	private int votes;
-    private Image albumArt;
+	private StringProperty title;
+	private StringProperty artist;
+    private StringProperty album;
+	private IntegerProperty duration;
+	private IntegerProperty votes;
+    private ObjectProperty<Image> coverArt;
 
 	public Song(File file) throws SongCreationException {
 		this.filepath = file.getAbsolutePath();
@@ -24,8 +26,14 @@ public class Song {
 		if(!file.getName().endsWith(".mp3"))
             throw new SongCreationException(file);
 
+        title = new SimpleStringProperty(this, "title", "");
+        artist = new SimpleStringProperty(this, "artist", "");
+        album = new SimpleStringProperty(this, "album", "");
+        duration = new SimpleIntegerProperty(this, "duration", 0);
+        votes = new SimpleIntegerProperty(this, "votes", 0);
+        coverArt = new SimpleObjectProperty<>(this, "coverArt", null);
+
 		getMp3Information(filepath);
-		votes = 0;
 	}
 
 	public File getFile() {
@@ -44,25 +52,31 @@ public class Song {
 		return "file:///" + getURI();
 	}
 
-	public String getTitle() {
-		return title;
-	}
 
-	public String getArtist() {
-		return artist;
-	}
-
-	public double getDuration() {
-		return duration;
-	}
-
-	public int getVotes() {
-		return votes;
-	}
-
-    public Image getAlbumArt() {
-        return albumArt;
+    public ReadOnlyStringProperty titleProperty() {
+        return title;
     }
+
+    public ReadOnlyStringProperty artistProperty() {
+        return artist;
+    }
+
+    public ReadOnlyStringProperty albumProperty() {
+        return album;
+    }
+
+    public ReadOnlyIntegerProperty durationProperty() {
+        return duration;
+    }
+
+    public ReadOnlyIntegerProperty votesProperty() {
+        return votes;
+    }
+
+    public ReadOnlyObjectProperty<Image> coverArtProperty() {
+        return coverArt;
+    }
+
 
 	public String toXML() {
 		String xmlString = "<song>" +
@@ -76,25 +90,25 @@ public class Song {
 	}
 
 	public int vote() {
-		votes += 1;
-		return votes;
+		votes.set(votes.get() + 1);
+		return votes.get();
 	}
 
 	private void getMp3Information(String filepath) throws SongCreationException {
         try {
             Mp3File song = new Mp3File(filepath);
             if (song.hasId3v2Tag()) {
-                ID3v2 id3v2tag = song.getId3v2Tag();
-                title = id3v2tag.getTitle();
-                artist = id3v2tag.getArtist();
-                duration = id3v2tag.getLength();
+                ID3v2 tag = song.getId3v2Tag();
 
-                byte[] imageData = id3v2tag.getAlbumImage();
-				if(imageData != null)
-                	albumArt = new Image(new ByteArrayInputStream(imageData));
-				else {
-					albumArt = null;
-				}
+                title.set(tag.getTitle());
+                artist.set(tag.getArtist());
+                album.set(tag.getAlbum());
+                duration.set(tag.getLength());
+
+                byte[] imageData = tag.getAlbumImage();
+				if(imageData != null) {
+                    coverArt.set(new Image(new ByteArrayInputStream(imageData)));
+                }
             }
         } catch (UnsupportedTagException | InvalidDataException | IOException e) {
             e.printStackTrace();

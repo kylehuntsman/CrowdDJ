@@ -15,14 +15,9 @@ public interface Player {
     void loop();
     void shuffle();
 
-    void setOnPlay(Runnable runnable);
-    void setOnPause(Runnable runnable);
-    void setOnStop(Runnable runnable);
-    void setOnNext(Runnable runnable);
-
-    boolean isPlaying();
-    boolean isPaused();
-    boolean isStopped();
+    ReadOnlyBooleanProperty playingProperty();
+    ReadOnlyBooleanProperty pausedProperty();
+    ReadOnlyBooleanProperty stoppedProperty();
 
     ReadOnlyBooleanProperty loopProperty();
     ReadOnlyBooleanProperty shuffleProperty();
