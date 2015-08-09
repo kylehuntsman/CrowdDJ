@@ -2,11 +2,11 @@ package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.database.DatabaseManager;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
-import com.github.funnygopher.crowddj.player.SimplePlayer;
 import com.github.funnygopher.crowddj.player.Player;
+import com.github.funnygopher.crowddj.player.SimplePlayer;
 import com.github.funnygopher.crowddj.playlist.Playlist;
-import com.github.funnygopher.crowddj.playlist.Song;
 import com.github.funnygopher.crowddj.playlist.SimplePlaylist;
+import com.github.funnygopher.crowddj.playlist.Song;
 import com.github.funnygopher.crowddj.server.CrowdDJServer;
 import com.github.funnygopher.crowddj.util.Property;
 import com.github.funnygopher.crowddj.util.PropertyManager;
@@ -86,10 +86,6 @@ public class CrowdDJ {
 
     public CrowdDJServer getServer() {
         return server;
-    }
-
-    public String getServerCode() {
-        return serverCode;
     }
 
     private void showUsedPortDialog() {
