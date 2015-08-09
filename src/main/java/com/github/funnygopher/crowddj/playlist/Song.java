@@ -26,7 +26,7 @@ public class Song {
 		if(!file.getName().endsWith(".mp3"))
             throw new SongCreationException(file);
 
-        title = new SimpleStringProperty(this, "title", "");
+        title = new SimpleStringProperty(this, "title", file.getName());
         artist = new SimpleStringProperty(this, "artist", "");
         album = new SimpleStringProperty(this, "album", "");
         duration = new SimpleIntegerProperty(this, "duration", 0);
@@ -80,10 +80,10 @@ public class Song {
 
 	public String toXML() {
 		String xmlString = "<song>" +
-				"<title>" + title + "</title>" +
-				"<artist>" + artist + "</artist>" +
+				"<title>" + title.get() + "</title>" +
+				"<artist>" + artist.get() + "</artist>" +
 				"<uri>" + getURI() + "</uri>" +
-				"<votes>" + votes + "</votes>" +
+				"<votes>" + votes.get() + "</votes>" +
 				"</song>";
 
 		return xmlString;

@@ -89,7 +89,7 @@ public class CrowdDJController implements Initializable {
         initPlayerView();
 
         player.playingProperty().addListener((observable, wasPlaying, isPlaying) -> {
-            if(isPlaying) {
+            if (isPlaying) {
                 miPlayPause.setOnAction(event -> player.pause());
                 miPlayPause.setText("Pause");
             } else {
@@ -153,12 +153,12 @@ public class CrowdDJController implements Initializable {
 
         apRoot.setOnDragDropped(dragEvent -> {
             Dragboard db = dragEvent.getDragboard();
-            boolean success = false;
             if (db.hasFiles()) {
-                success = true;
+                dragEvent.setDropCompleted(true);
                 db.getFiles().forEach(file -> playlist.add(file));
+            } else {
+                dragEvent.setDropCompleted(false);
             }
-            dragEvent.setDropCompleted(success);
             dragEvent.consume();
         });
 
@@ -204,7 +204,7 @@ public class CrowdDJController implements Initializable {
         TableColumn<Song, String> playlistArtist = new TableColumn<>("Artist");
 
         playlistTitle.setMinWidth(300);
-        playlistArtist.setMinWidth(100);
+        playlistArtist.setMinWidth(150);
 
         playlistTitle.setCellValueFactory( new PropertyValueFactory<>("title"));
         playlistArtist.setCellValueFactory(new PropertyValueFactory<>("artist"));
