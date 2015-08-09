@@ -34,7 +34,6 @@ public class CrowdDJServer {
 
         ContextHandler anybodyHomeContext = new ContextHandler();
         anybodyHomeContext.setContextPath("/anybodyhome");
-        System.out.println("JUSTIN WAS HERE");
         anybodyHomeContext.setHandler(new AnybodyHomeHandler());
 
         HandlerList handlers = new HandlerList();

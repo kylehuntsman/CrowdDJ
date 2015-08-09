@@ -47,7 +47,7 @@ public class CrowdDJ {
         try {
             server.start();
         } catch (BindException e) {
-            e.printStackTrace();
+            showUsedPortDialog();
         }
     }
 
