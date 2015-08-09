@@ -55,12 +55,20 @@
                   <CheckMenuItem fx:id="cmiShowPlaylist" mnemonicParsing="false" text="Show playlist" />
                </items>
             </Menu>
-          <Menu fx:id="mTools" mnemonicParsing="false" text="Tools" />
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
+            <Menu mnemonicParsing="false" text="Server Code">
+               <items>
+                  <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
+                     <content>
+                        <Label fx:id="lbServerCode" text="Server Code" textFill="#333333">
+                           <font>
+                              <Font size="31.0" />
+                           </font>
+                        </Label>
+                     </content>
+                  </CustomMenuItem>
+               </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Help" />
         </menus>
       </MenuBar>
       <AnchorPane fx:id="pPlaylist" layoutX="14.0" layoutY="36.0" prefHeight="350.0" prefWidth="570.0" AnchorPane.bottomAnchor="214.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="36.0">

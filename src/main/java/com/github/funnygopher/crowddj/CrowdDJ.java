@@ -13,7 +13,7 @@ import com.github.funnygopher.crowddj.util.PropertyManager;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
-import java.net.BindException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -28,7 +28,12 @@ public class CrowdDJ {
     private CrowdDJController controller;
     private CrowdDJServer server;
 
-    public CrowdDJ() {
+    private final String serverCode;
+    private boolean validPort;
+
+    public CrowdDJ() throws UnknownHostException, SocketException {
+        validPort = false;
+
         // Sets up the properties file
 		properties = new PropertyManager("crowddj.properties");
 
@@ -43,14 +48,20 @@ public class CrowdDJ {
         // Sets up the player
         player = new SimplePlayer(playlist);
 
-        controller = new CrowdDJController(player, playlist);
-
         server = new CrowdDJServer(player, playlist);
-        try {
-            server.start();
-        } catch (BindException e) {
-            showUsedPortDialog();
-        }
+
+        do {
+            try {
+                server.start();
+                validPort = true;
+            } catch (BindException e) {
+                server.forceStop();
+                showUsedPortDialog();
+            }
+        } while(!validPort);
+
+        serverCode = createServerCode();
+        controller = new CrowdDJController(player, playlist, serverCode);
     }
 
     public static DatabaseManager getDatabase() {
@@ -77,6 +88,10 @@ public class CrowdDJ {
         return server;
     }
 
+    public String getServerCode() {
+        return serverCode;
+    }
+
     private void showUsedPortDialog() {
         int port = CrowdDJ.getProperties().getIntProperty(Property.PORT);
         int newPort = port + 1;
@@ -90,7 +105,6 @@ public class CrowdDJ {
             CrowdDJ.getProperties().setProperty(Property.PORT, result.get());
             CrowdDJ.getProperties().saveProperties();
 
-            server.stop();
             server = new CrowdDJServer(player, playlist);
         } catch (NoSuchElementException e) {
             server.forceStop();
@@ -99,6 +113,47 @@ public class CrowdDJ {
             alert.setHeaderText("Server functionality will not be active");
             alert.setContentText("To enable server functionality, restart the application.");
             alert.showAndWait();
+            validPort = true;
         }
+    }
+
+    private String getIpAddress() {
+        try {
+            return Inet4Address.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            return "";
+        }
+    }
+
+    private String createServerCode() throws UnknownHostException, SocketException {
+        String ipAddress = getIpAddress();
+        NetworkInterface networkInterface = NetworkInterface.getByInetAddress(Inet4Address.getLocalHost());
+        int mask = networkInterface.getInterfaceAddresses().get(0).getNetworkPrefixLength();
+
+        String[] octets = ipAddress.split("\\.");
+        String lengthData = "";
+        String unhashedServerCode = "";
+
+        // Creates the serverCode and the lengthData
+        for(int i = 0; i <= 24; i += 8) {
+            if(i <= mask && mask < (i + 8)) {
+                int index = i / 8;
+                unhashedServerCode += octets[index];
+                lengthData += octets[index].length();
+            }
+        }
+        lengthData = String.format("%0"+(4-lengthData.length())+"d%s", 0, lengthData);
+
+        int port = CrowdDJ.getProperties().getIntProperty(Property.PORT);
+        String hashedPort = Integer.toString(port, 36).toUpperCase();
+
+        unhashedServerCode += lengthData;
+        String hashedServerCode = Long.toString(Long.valueOf(unhashedServerCode), 36).toUpperCase();
+        hashedServerCode += "-" + hashedPort;
+
+        System.out.println(unhashedServerCode);
+        System.out.println(hashedServerCode);
+
+        return hashedServerCode;
     }
 }

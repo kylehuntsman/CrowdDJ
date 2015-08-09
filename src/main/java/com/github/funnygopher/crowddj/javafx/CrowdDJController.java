@@ -20,6 +20,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.net.URL;
@@ -42,6 +43,9 @@ public class CrowdDJController implements Initializable {
 
     @FXML
     MenuItem miAddFiles, miClearPlaylist;
+
+    @FXML
+    Label lbServerCode;
 
     @FXML
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
@@ -67,15 +71,17 @@ public class CrowdDJController implements Initializable {
     @FXML
     ProgressBar pbSongProgress;
 
-    private Player player;
-    private Playlist playlist;
+    private final Player player;
+    private final Playlist playlist;
+    private final String serverCode;
 
     private final Image DEFAULT_COVER_ART;
     private EventHandler<ActionEvent> addFilesEvent, clearPlaylistEvent;
 
-    public CrowdDJController(Player player, Playlist playlist) {
+    public CrowdDJController(Player player, Playlist playlist, String serverCode) {
         this.player = player;
         this.playlist = playlist;
+        this.serverCode = serverCode;
 
         DEFAULT_COVER_ART = getImage("default_cover_art.png");
     }
@@ -196,21 +202,26 @@ public class CrowdDJController implements Initializable {
         cmiShowPlaylist.selectedProperty().addListener((observable, oldValue, newValue) -> {
             pPlaylist.setVisible(newValue);
         });
+
+        lbServerCode.setText(serverCode);
     }
 
     private void initPlaylistView() {
         // Creates the table columns
         TableColumn<Song, String> playlistTitle = new TableColumn<>("Title");
         TableColumn<Song, String> playlistArtist = new TableColumn<>("Artist");
+        TableColumn<Song, String> playlistVotes = new TableColumn<>("Votes");
 
         playlistTitle.setMinWidth(300);
         playlistArtist.setMinWidth(150);
+        playlistVotes.setMinWidth(100);
 
-        playlistTitle.setCellValueFactory( new PropertyValueFactory<>("title"));
+        playlistTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         playlistArtist.setCellValueFactory(new PropertyValueFactory<>("artist"));
+        playlistVotes.setCellValueFactory(new PropertyValueFactory<>("votes"));
 
         tblPlaylist.setItems(playlist.getItems());
-        tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist);
+        tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist, playlistVotes);
         tblPlaylist.setOpacity(.75);
         tblPlaylist.getStylesheets().add(getCss("playlist_table.css"));
 
