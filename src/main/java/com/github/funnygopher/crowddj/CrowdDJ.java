@@ -10,10 +10,12 @@ import com.github.funnygopher.crowddj.playlist.SimplePlaylist;
 import com.github.funnygopher.crowddj.server.CrowdDJServer;
 import com.github.funnygopher.crowddj.util.Property;
 import com.github.funnygopher.crowddj.util.PropertyManager;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
 import java.net.BindException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class CrowdDJ {
@@ -77,18 +79,26 @@ public class CrowdDJ {
 
     private void showUsedPortDialog() {
         int port = CrowdDJ.getProperties().getIntProperty(Property.PORT);
-
-        TextInputDialog dialog = new TextInputDialog(String.valueOf(port));
+        int newPort = port + 1;
+        TextInputDialog dialog = new TextInputDialog(String.valueOf(newPort));
         dialog.setTitle("Server Error");
-        dialog.setHeaderText("The port " + port + " is already in use. You should try another port number.");
-        dialog.setContentText("Port number:");
+        dialog.setHeaderText("The port " + port + " is already in use. Cancelling will stop the server.");
+        dialog.setContentText("New port number:");
 
-        // Traditional way to get the response value.
-        Optional<String> result = dialog.showAndWait();
-        CrowdDJ.getProperties().setProperty(Property.PORT, result.get());
-        CrowdDJ.getProperties().saveProperties();
+        try {
+            Optional<String> result = dialog.showAndWait();
+            CrowdDJ.getProperties().setProperty(Property.PORT, result.get());
+            CrowdDJ.getProperties().saveProperties();
 
-        server.stop();
-        server = new CrowdDJServer(player, playlist);
+            server.stop();
+            server = new CrowdDJServer(player, playlist);
+        } catch (NoSuchElementException e) {
+            server.forceStop();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Server Information");
+            alert.setHeaderText("Server functionality will not be active");
+            alert.setContentText("To enable server functionality, restart the application.");
+            alert.showAndWait();
+        }
     }
 }

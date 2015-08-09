@@ -62,4 +62,12 @@ public class CrowdDJServer {
             }
         }
     }
+
+    public void forceStop() {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
