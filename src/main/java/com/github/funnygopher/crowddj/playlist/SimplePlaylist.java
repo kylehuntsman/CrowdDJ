@@ -19,7 +19,7 @@ import java.util.Random;
 
 import static com.github.funnygopher.crowddj.database.jooq.Tables.PLAYLIST;
 
-public class SongPlaylist implements Playlist {
+public class SimplePlaylist implements Playlist {
 
     private ObservableList<Song> thePlaylist;
     public final String CREATE_PLAYLIST_TABLE =
@@ -28,7 +28,7 @@ public class SongPlaylist implements Playlist {
                     "FILEPATH VARCHAR(255) NOT NULL" +
                     ");";
 
-    public SongPlaylist(List<Song> thePlaylist) {
+    public SimplePlaylist(List<Song> thePlaylist) {
         this.thePlaylist = FXCollections.observableArrayList(thePlaylist);
         populateFromDatabase();
     }
@@ -166,6 +166,9 @@ public class SongPlaylist implements Playlist {
             for (Record result : results) {
                 String filepath = result.getValue(PLAYLIST.FILEPATH);
                 File file = new File(filepath);
+                if(!file.exists())
+                    return;
+
                 try {
                     Song song = new Song(file);
                     thePlaylist.add(song);

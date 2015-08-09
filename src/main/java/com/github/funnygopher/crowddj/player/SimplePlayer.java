@@ -6,7 +6,7 @@ import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-public class AudioPlayer implements Player {
+public class SimplePlayer implements Player {
 
     private final Playlist playlist;
     private double volume = .5;
@@ -18,7 +18,7 @@ public class AudioPlayer implements Player {
     private ObjectProperty<Song> currentSong;
     private ObjectProperty<MediaPlayer> currentPlayer;
 
-    public AudioPlayer(Playlist playlist) {
+    public SimplePlayer(Playlist playlist) {
         this.playlist = playlist;
 
         playing = new SimpleBooleanProperty(this, "playing", false);
