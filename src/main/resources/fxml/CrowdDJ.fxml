@@ -59,11 +59,7 @@
                <items>
                   <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
                      <content>
-                        <Label fx:id="lbServerCode" text="Server Code" textFill="#333333">
-                           <font>
-                              <Font size="31.0" />
-                           </font>
-                        </Label>
+                        <ImageView fx:id="ivQRCode" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
                      </content>
                   </CustomMenuItem>
                </items>

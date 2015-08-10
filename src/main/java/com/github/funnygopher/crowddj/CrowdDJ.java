@@ -60,7 +60,8 @@ public class CrowdDJ {
         } while(!validPort);
 
         serverCode = createServerCode();
-        controller = new CrowdDJController(player, playlist, serverCode);
+        String fullIP = "crowddjmobileapp://" + getIpAddress() + ":" + properties.getIntProperty(Property.PORT);
+        controller = new CrowdDJController(player, playlist, fullIP);
     }
 
     public static DatabaseManager getDatabase() {

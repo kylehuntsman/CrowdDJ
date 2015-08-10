@@ -4,6 +4,17 @@ import com.github.funnygopher.crowddj.javafx.buttons.ButtonUtil;
 import com.github.funnygopher.crowddj.player.Player;
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.playlist.Song;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.google.zxing.qrcode.encoder.QRCode;
+import com.sun.javafx.iio.ImageStorage;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -22,11 +33,13 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class CrowdDJController implements Initializable {
 
@@ -46,7 +59,7 @@ public class CrowdDJController implements Initializable {
     MenuItem miAddFiles, miClearPlaylist;
 
     @FXML
-    Label lbServerCode;
+    ImageView ivQRCode;
 
     @FXML
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
@@ -204,7 +217,20 @@ public class CrowdDJController implements Initializable {
             pPlaylist.setVisible(newValue);
         });
 
-        lbServerCode.setText(serverCode);
+        try {
+            Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix byteMatrix = qrCodeWriter.encode(serverCode, BarcodeFormat.QR_CODE, 250, 250, hintMap);
+            ByteOutputStream out = new ByteOutputStream();
+            MatrixToImageWriter.writeToStream(byteMatrix, "PNG", out);
+            Image qrCode = new Image(new ByteArrayInputStream(out.getBytes()));
+            ivQRCode.setImage(qrCode);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initPlaylistView() {
