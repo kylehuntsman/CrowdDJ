@@ -59,7 +59,7 @@ public class CrowdDJController implements Initializable {
     MenuItem miAddFiles, miClearPlaylist;
 
     @FXML
-    ImageView ivQRCode;
+    ToggleButton tbShowQRCode;
 
     @FXML
     CheckMenuItem cmiShuffle, cmiShowPlaylist;
@@ -90,6 +90,7 @@ public class CrowdDJController implements Initializable {
     private final String serverCode;
 
     private final Image DEFAULT_COVER_ART;
+    private final Image QR_CODE;
     private EventHandler<ActionEvent> addFilesEvent, clearPlaylistEvent;
 
     public CrowdDJController(Player player, Playlist playlist, String serverCode) {
@@ -98,6 +99,7 @@ public class CrowdDJController implements Initializable {
         this.serverCode = serverCode;
 
         DEFAULT_COVER_ART = getImage("default_cover_art.png");
+        QR_CODE = getQRCode();
     }
 
     @Override
@@ -217,20 +219,17 @@ public class CrowdDJController implements Initializable {
             pPlaylist.setVisible(newValue);
         });
 
-        try {
-            Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
-            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix byteMatrix = qrCodeWriter.encode(serverCode, BarcodeFormat.QR_CODE, 250, 250, hintMap);
-            ByteOutputStream out = new ByteOutputStream();
-            MatrixToImageWriter.writeToStream(byteMatrix, "PNG", out);
-            Image qrCode = new Image(new ByteArrayInputStream(out.getBytes()));
-            ivQRCode.setImage(qrCode);
-        } catch (WriterException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        tbShowQRCode.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue) {
+                ivCoverArt.setImage(QR_CODE);
+            } else {
+                if(player.currentSongProperty().get() == null) {
+                    ivCoverArt.setImage(DEFAULT_COVER_ART);
+                } else {
+                    ivCoverArt.setImage(player.currentSongProperty().get().coverArtProperty().get());
+                }
+            }
+        });
     }
 
     private void initPlaylistView() {
@@ -365,5 +364,23 @@ public class CrowdDJController implements Initializable {
 
     private String getCss(String cssName) {
         return getClass().getResource("/css/" + cssName).toExternalForm();
+    }
+
+    private Image getQRCode() {
+        try {
+            Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix byteMatrix = qrCodeWriter.encode(serverCode, BarcodeFormat.QR_CODE, 250, 250, hintMap);
+            ByteOutputStream out = new ByteOutputStream();
+            MatrixToImageWriter.writeToStream(byteMatrix, "PNG", out);
+            return new Image(new ByteArrayInputStream(out.getBytes()));
+        } catch (WriterException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

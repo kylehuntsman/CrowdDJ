@@ -59,7 +59,7 @@
                <items>
                   <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
                      <content>
-                        <ImageView fx:id="ivQRCode" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+                        <ToggleButton fx:id="tbShowQRCode" mnemonicParsing="false" text="Show QR Code" />
                      </content>
                   </CustomMenuItem>
                </items>
