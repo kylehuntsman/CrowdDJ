@@ -10,6 +10,8 @@ import com.github.funnygopher.crowddj.playlist.Song;
 import com.github.funnygopher.crowddj.server.CrowdDJServer;
 import com.github.funnygopher.crowddj.util.Property;
 import com.github.funnygopher.crowddj.util.PropertyManager;
+import com.github.funnygopher.crowddj.voting.SimpleVotingBooth;
+import com.github.funnygopher.crowddj.voting.VotingBooth;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
@@ -27,13 +29,12 @@ public class CrowdDJ {
     private SimplePlaylist playlist;
     private CrowdDJController controller;
     private CrowdDJServer server;
+    private VotingBooth votingBooth;
 
     private final String serverCode;
     private boolean validPort;
 
     public CrowdDJ() throws UnknownHostException, SocketException {
-        validPort = false;
-
         // Sets up the properties file
 		properties = new PropertyManager("crowddj.properties");
 
@@ -42,14 +43,12 @@ public class CrowdDJ {
 		String dbPassword = properties.getStringProperty(Property.DB_PASSWORD);
 		database = new DatabaseManager("jdbc:h2:~/.CrowdDJ/db/crowddj", dbUsername, dbPassword);
 
-        // Sets up the playlist
         playlist = new SimplePlaylist(new ArrayList<Song>());
+        votingBooth = new SimpleVotingBooth();
+        player = new SimplePlayer(playlist, votingBooth);
+        server = new CrowdDJServer(player, playlist, votingBooth);
 
-        // Sets up the player
-        player = new SimplePlayer(playlist);
-
-        server = new CrowdDJServer(player, playlist);
-
+        validPort = false;
         do {
             try {
                 server.start();
@@ -101,7 +100,7 @@ public class CrowdDJ {
             CrowdDJ.getProperties().setProperty(Property.PORT, result.get());
             CrowdDJ.getProperties().saveProperties();
 
-            server = new CrowdDJServer(player, playlist);
+            server = new CrowdDJServer(player, playlist, votingBooth);
         } catch (NoSuchElementException e) {
             server.forceStop();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

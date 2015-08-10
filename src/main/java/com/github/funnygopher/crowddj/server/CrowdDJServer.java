@@ -7,6 +7,7 @@ import com.github.funnygopher.crowddj.jetty.PlaylistHandler;
 import com.github.funnygopher.crowddj.player.Player;
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.util.Property;
+import com.github.funnygopher.crowddj.voting.VotingBooth;
 import javafx.scene.control.TextInputDialog;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -20,7 +21,7 @@ public class CrowdDJServer {
 
     private Server server;
 
-    public CrowdDJServer(Player player, Playlist playlist) {
+    public CrowdDJServer(Player player, Playlist playlist, VotingBooth votingBooth) {
         int port = CrowdDJ.getProperties().getIntProperty(Property.PORT);
         server = new Server(port);
 
@@ -30,7 +31,7 @@ public class CrowdDJServer {
 
         ContextHandler playlistContext = new ContextHandler();
         playlistContext.setContextPath("/playlist");
-        playlistContext.setHandler(new PlaylistHandler(playlist));
+        playlistContext.setHandler(new PlaylistHandler(playlist, votingBooth));
 
         ContextHandler anybodyHomeContext = new ContextHandler();
         anybodyHomeContext.setContextPath("/anybodyhome");

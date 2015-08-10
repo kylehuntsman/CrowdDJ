@@ -2,6 +2,7 @@ package com.github.funnygopher.crowddj.player;
 
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.playlist.Song;
+import com.github.funnygopher.crowddj.voting.VotingBooth;
 import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -10,6 +11,7 @@ public class SimplePlayer implements Player {
 
     private final Playlist playlist;
     private double volume = .5;
+    private VotingBooth<Song> votingBooth;
 
     private BooleanProperty playing, paused, stopped;
     private BooleanProperty shuffle, loop;
@@ -18,8 +20,9 @@ public class SimplePlayer implements Player {
     private ObjectProperty<Song> currentSong;
     private ObjectProperty<MediaPlayer> currentPlayer;
 
-    public SimplePlayer(Playlist playlist) {
+    public SimplePlayer(Playlist playlist, VotingBooth votingBooth) {
         this.playlist = playlist;
+        this.votingBooth = votingBooth;
 
         playing = new SimpleBooleanProperty(this, "playing", false);
         paused = new SimpleBooleanProperty(this, "paused", false);
@@ -159,27 +162,36 @@ public class SimplePlayer implements Player {
 
     // Returns the next song in the playlist, accounting for looping and shuffling
     private MediaPlayer getNextMediaPlayer() {
-        Song newSong = playlist.getNextItem(currentSong.get());
+        Song song;
 
-        if(newSong == null) {
-            if (loop.getValue()) {
-                newSong = playlist.getItem(0);
+        if(votingBooth.isActive() && votingBooth.getNumberOfVotes() > 0) {
+            song = votingBooth.tallyVotesNoTies();
+        } else {
+            song = playlist.getNextItem(currentSong.get());
+
+            if (song == null) {
+                if (loop.getValue()) {
+                    song = playlist.getItem(0);
+                }
+            }
+
+            if (shuffle.getValue()) {
+                do {
+                    song = playlist.getRandomItem();
+                } while (currentSong.get() == song);
             }
         }
 
-        if(shuffle.getValue()) {
-            do {
-                newSong = playlist.getRandomItem();
-            } while(currentSong.get() == newSong);
-        }
-
-        currentSong.set(newSong);
+        currentSong.set(song);
         return createPlayer(currentSong.get());
     }
 
     private MediaPlayer createPlayer(Song song) {
         final Media media = new Media(song.getFileURI());
         final MediaPlayer player = new MediaPlayer(media);
+
+        player.setOnEndOfMedia(() -> next());
+
         return player;
     }
 }

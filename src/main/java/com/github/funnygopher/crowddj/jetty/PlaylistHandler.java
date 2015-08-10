@@ -1,6 +1,9 @@
 package com.github.funnygopher.crowddj.jetty;
 
 import com.github.funnygopher.crowddj.playlist.Playlist;
+import com.github.funnygopher.crowddj.playlist.Song;
+import com.github.funnygopher.crowddj.util.SearchParty;
+import com.github.funnygopher.crowddj.voting.VotingBooth;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -12,10 +15,12 @@ import java.io.IOException;
 
 public class PlaylistHandler extends AbstractHandler {
 
-	private Playlist playlist;
+    private Playlist playlist;
+    private VotingBooth<Song> votingBooth;
 
-	public PlaylistHandler(Playlist playlist) {
-		this.playlist = playlist;
+	public PlaylistHandler(Playlist playlist, VotingBooth<Song> votingBooth) {
+        this.playlist = playlist;
+        this.votingBooth = votingBooth;
 	}
 
 	@Override
@@ -24,9 +29,15 @@ public class PlaylistHandler extends AbstractHandler {
 		httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
 		String fileURI = httpServletRequest.getParameter("vote");
-		if(fileURI != null) {
+        String user = httpServletRequest.getParameter("user");
+
+		if(fileURI != null && user != null) {
 			File songFile = new File(fileURI);
-			playlist.vote(songFile);
+            SearchParty<Song> party = playlist.search(songFile);
+            if(party.found()) {
+                Song song = party.rescue();
+                votingBooth.vote(song, user);
+            }
 		}
 
 		String xml = playlist.toXML();

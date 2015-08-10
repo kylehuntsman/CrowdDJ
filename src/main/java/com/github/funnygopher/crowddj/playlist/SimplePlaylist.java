@@ -58,12 +58,6 @@ public class SimplePlaylist implements Playlist {
         }
     }
 
-    public void add(List<Song> songs) {
-        for (Song song : songs) {
-            add(song);
-        }
-    }
-
     public void remove(Song song) {
         thePlaylist.remove(song);
     }
@@ -74,22 +68,6 @@ public class SimplePlaylist implements Playlist {
 
     public int size() {
         return thePlaylist.size();
-    }
-
-    public int vote(File file) {
-        SearchParty<Song> party = search(file);
-        if(party.found()) {
-            Song song = party.rescue();
-            return vote(song);
-        }
-        return 0;
-    }
-
-    public int vote(Song song) {
-        if(thePlaylist.contains(song)) {
-            return song.vote();
-        }
-        return 0;
     }
 
     public SearchParty<Song> search(File file) {

@@ -1,5 +1,6 @@
 package com.github.funnygopher.crowddj.playlist;
 
+import com.github.funnygopher.crowddj.voting.Voteable;
 import com.github.funnygopher.crowddj.util.XFile;
 import com.mpatric.mp3agic.*;
 import javafx.beans.property.*;
@@ -10,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLEncoder;
 
-public class Song {
+public class Song implements Voteable {
 
     private String filepath;
 	private StringProperty title;
@@ -89,10 +90,19 @@ public class Song {
 		return xmlString;
 	}
 
-	public int vote() {
+	public void vote() {
 		votes.set(votes.get() + 1);
-		return votes.get();
 	}
+
+    public void unvote() {
+        if(votes.get() > 0) {
+            votes.set(votes.get() - 1);
+        }
+    }
+
+    public void clearVotes() {
+        votes.set(0);
+    }
 
 	private void getMp3Information(String filepath) throws SongCreationException {
         try {
@@ -158,5 +168,18 @@ public class Song {
         } catch (SongCreationException e) {
             e.printStackTrace();
         }
+    }
+
+    public int compareTo(Voteable voteable) {
+        if(this.votesProperty().get() == voteable.votesProperty().get())
+            return 0;
+
+        if(this.votesProperty().get() < voteable.votesProperty().get())
+            return -1;
+
+        if(this.votesProperty().get() > voteable.votesProperty().get())
+            return 1;
+
+        return 0;
     }
 }

@@ -18,7 +18,6 @@ public interface Playlist  {
     Song getRandomItem();
     ObservableList<Song> getItems();
 
-    int vote(File file);
     SearchParty<Song> search(File file);
     void updateDatabaseTable();
 }
