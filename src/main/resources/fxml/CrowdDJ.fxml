@@ -10,6 +10,7 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.*?>
 
 <AnchorPane fx:id="apRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -34,39 +35,44 @@
             </LinearGradient>
          </fill>
       </Rectangle>
-      <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="Playback">
-            <items>
-              <MenuItem fx:id="miPlayPause" mnemonicParsing="false" text="Play" />
-                  <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
-                  <MenuItem fx:id="miNext" mnemonicParsing="false" text="Next" />
-                  <CheckMenuItem fx:id="cmiShuffle" mnemonicParsing="false" text="Shuffle" />
-            </items>
-          </Menu>
-            <Menu mnemonicParsing="false" text="Playlist">
-              <items>
-                <MenuItem fx:id="miAddFiles" mnemonicParsing="false" text="Add files..." />
-                  <MenuItem fx:id="miClearPlaylist" mnemonicParsing="false" text="Clear playlist" />
-              </items>
-            </Menu>
-            <Menu fx:id="mView" mnemonicParsing="false" text="View">
-               <items>
-                  <CheckMenuItem fx:id="cmiShowPlaylist" mnemonicParsing="false" text="Show playlist" />
-               </items>
-            </Menu>
-            <Menu mnemonicParsing="false" text="Server Code">
-               <items>
-                  <MenuItem fx:id="miSaveQRCode" mnemonicParsing="false" text="Save QR Code..." />
-                  <CheckMenuItem fx:id="cmiShowQRCode" mnemonicParsing="false" text="Show QR Code" />
-               </items>
-            </Menu>
-          <Menu mnemonicParsing="false" text="Help" />
-        </menus>
-      </MenuBar>
+      <HiddenSidesPane fx:id="hspMenuPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+          <top>
+              <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <menus>
+                  <Menu mnemonicParsing="false" text="Playback">
+                    <items>
+                      <MenuItem fx:id="miPlayPause" mnemonicParsing="false" text="Play" />
+                          <MenuItem fx:id="miStop" mnemonicParsing="false" text="Stop" />
+                          <MenuItem fx:id="miNext" mnemonicParsing="false" text="Next" />
+                          <CheckMenuItem fx:id="cmiShuffle" mnemonicParsing="false" text="Shuffle" />
+                    </items>
+                  </Menu>
+                    <Menu mnemonicParsing="false" text="Playlist">
+                      <items>
+                        <MenuItem fx:id="miAddFiles" mnemonicParsing="false" text="Add files..." />
+                        <MenuItem fx:id="miClearPlaylist" mnemonicParsing="false" text="Clear playlist" />
+                      </items>
+                    </Menu>
+                    <Menu fx:id="mView" mnemonicParsing="false" text="View">
+                       <items>
+                           <CheckMenuItem fx:id="cmiPresentationMode" mnemonicParsing="false" text="Presentation Mode" />
+                           <CheckMenuItem fx:id="cmiAutoHideMenuBar" mnemonicParsing="false" text="Autohide menu when presenting" />
+                       </items>
+                    </Menu>
+                    <Menu mnemonicParsing="false" text="Server Code">
+                       <items>
+                          <MenuItem fx:id="miSaveQRCode" mnemonicParsing="false" text="Save QR Code..." />
+                          <CheckMenuItem fx:id="cmiShowQRCode" mnemonicParsing="false" text="Show QR Code" />
+                       </items>
+                    </Menu>
+                  <Menu mnemonicParsing="false" text="Help" />
+                </menus>
+              </MenuBar>
+          </top>
+      </HiddenSidesPane>
       <AnchorPane fx:id="pPlaylist" layoutX="14.0" layoutY="36.0" prefHeight="350.0" prefWidth="570.0" AnchorPane.bottomAnchor="214.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="36.0">
          <children>
-            <TableView fx:id="tblPlaylist" prefHeight="350.0" prefWidth="570.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <TableView fx:id="tblPlaylist" prefHeight="350.0" prefWidth="570.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
          </children>
       </AnchorPane>
       <AnchorPane layoutY="313.0" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

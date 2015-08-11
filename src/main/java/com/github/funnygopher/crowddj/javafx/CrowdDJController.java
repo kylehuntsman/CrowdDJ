@@ -8,19 +8,26 @@ import com.github.funnygopher.crowddj.util.QRCode;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import org.controlsfx.control.HiddenSidesPane;
 
 import java.io.File;
 import java.net.URL;
@@ -48,7 +55,7 @@ public class CrowdDJController implements Initializable {
     MenuItem miSaveQRCode;
 
     @FXML
-    CheckMenuItem cmiShuffle, cmiShowPlaylist, cmiShowQRCode;
+    CheckMenuItem cmiShuffle, cmiPresentationMode, cmiAutoHideMenuBar, cmiShowQRCode;
 
     @FXML
     TableView<Song> tblPlaylist;
@@ -57,7 +64,7 @@ public class CrowdDJController implements Initializable {
     ImageView ivCoverArt;
 
     @FXML
-    Label lblDragAndDrop, lbSongTime, lbSongTotalTime;
+    Label lbSongTime, lbSongTotalTime;
 
     @FXML
     Text lbTitle, lbArtist;
@@ -71,6 +78,9 @@ public class CrowdDJController implements Initializable {
     @FXML
     ProgressBar pbSongProgress;
 
+    @FXML
+    HiddenSidesPane hspMenuPane;
+
     private final Player player;
     private final Playlist playlist;
     private final String serverCode;
@@ -78,6 +88,7 @@ public class CrowdDJController implements Initializable {
     private final Image DEFAULT_COVER_ART;
     private final Image QR_CODE;
     private EventHandler<ActionEvent> addFilesEvent, clearPlaylistEvent;
+    private ChangeListener<? super Boolean> autohideMenuListener;
 
     public CrowdDJController(Player player, Playlist playlist, String serverCode) {
         this.player = player;
@@ -90,7 +101,7 @@ public class CrowdDJController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initEvents();
+        initEventsAndListeners();
         initRoot();
         initMenuView();
         initPlaylistView();
@@ -112,7 +123,7 @@ public class CrowdDJController implements Initializable {
         showDefaultPlayer();
     }
 
-    private void initEvents() {
+    private void initEventsAndListeners() {
         addFilesEvent = event -> {
             FileChooser fileChooser = new FileChooser();
             List<File> list = fileChooser.showOpenMultipleDialog(apRoot.getScene().getWindow());
@@ -124,6 +135,14 @@ public class CrowdDJController implements Initializable {
         clearPlaylistEvent = event -> {
             playlist.clear();
             playlist.updateDatabaseTable();
+        };
+
+        autohideMenuListener = (observable, oldValue, newValue) -> {
+            if (!newValue) {
+                hspMenuPane.setPinnedSide(Side.TOP);
+            } else {
+                hspMenuPane.setPinnedSide(null);
+            }
         };
     }
 
@@ -178,6 +197,13 @@ public class CrowdDJController implements Initializable {
     }
 
     private void initMenuView() {
+        hspMenuPane.setPinnedSide(Side.TOP);
+        hspMenuPane.setPrefHeight(50);
+        hspMenuPane.setLayoutX(0);
+        hspMenuPane.setLayoutY(0);
+        hspMenuPane.setAnimationDuration(new Duration(100));
+        hspMenuPane.setAnimationDelay(new Duration(50));
+
         menuBar.getStylesheets().add(this.getClass().getResource("/css/label_separator.css").toExternalForm());
         menuBar.getStylesheets().add(this.getClass().getResource("/css/dark_menubar.css").toExternalForm());
 
@@ -185,7 +211,7 @@ public class CrowdDJController implements Initializable {
         miStop.setAccelerator(new KeyCodeCombination(KeyCode.ESCAPE));
         miNext.setAccelerator(new KeyCodeCombination(KeyCode.RIGHT));
         cmiShuffle.setAccelerator(new KeyCodeCombination(KeyCode.SLASH, KeyCombination.SHIFT_DOWN));
-        cmiShowPlaylist.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
+        cmiPresentationMode.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
 
         cmiShowQRCode.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
 
@@ -202,9 +228,18 @@ public class CrowdDJController implements Initializable {
             cmiShuffle.setSelected(newValue);
         });
 
-        cmiShowPlaylist.selectedProperty().set(true);
-        cmiShowPlaylist.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            pPlaylist.setVisible(newValue);
+        // What gets changed during presentation mode;
+        pPlaylist.visibleProperty().bind(cmiPresentationMode.selectedProperty().not());
+        cmiAutoHideMenuBar.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue) {
+                cmiPresentationMode.selectedProperty().addListener(autohideMenuListener);
+                if(cmiPresentationMode.selectedProperty().get()) {
+                    hspMenuPane.setPinnedSide(null);
+                }
+            } else {
+                cmiPresentationMode.selectedProperty().removeListener(autohideMenuListener);
+                hspMenuPane.setPinnedSide(Side.TOP);
+            }
         });
 
         miSaveQRCode.setOnAction(event -> saveQRCode());
@@ -239,6 +274,16 @@ public class CrowdDJController implements Initializable {
         tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist, playlistVotes);
         tblPlaylist.setOpacity(.75);
         tblPlaylist.getStylesheets().add(getCss("playlist_table.css"));
+
+        // Sets the content to display when there are no items in the table
+        Image downArrow = getImage("/dark/arrow-down-7-128.png");
+        ImageView ivPlaceholderImage = new ImageView(downArrow);
+        Label lbPlaceholderLabel = new Label("\nPlaylist is currently empty.\nDrag files here or right click to add.");
+        lbPlaceholderLabel.setTextAlignment(TextAlignment.CENTER);
+        VBox placeholder = new VBox();
+        placeholder.setAlignment(Pos.CENTER);
+        placeholder.getChildren().addAll(ivPlaceholderImage, lbPlaceholderLabel);
+        tblPlaylist.setPlaceholder(placeholder);
 
         final ContextMenu contextMenu = new ContextMenu();
         MenuItem addFiles = new MenuItem("Add files...");
