@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class Main extends Application {
 
             Platform.setImplicitExit(true);
             Stage stage = new Stage();
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/product_icon.png")));
             stage.setOnCloseRequest(windowEvent -> {
                 crowdDJ.getServer().stop();
                 crowdDJ.getPlayer().reset();
