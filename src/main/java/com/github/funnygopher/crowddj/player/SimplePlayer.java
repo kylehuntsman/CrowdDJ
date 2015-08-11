@@ -7,6 +7,9 @@ import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
+import java.util.Random;
+import java.util.Stack;
+
 public class SimplePlayer implements Player {
 
     private final Playlist playlist;
@@ -176,9 +179,19 @@ public class SimplePlayer implements Player {
             }
 
             if (shuffle.getValue()) {
-                do {
-                    song = playlist.getRandomItem();
-                } while (currentSong.get() == song);
+                Stack<Integer> indexes = new Stack<>();
+                for(int i = 0; i < playlist.size(); i++)
+                    indexes.push(i);
+                shuffleBag(indexes);
+
+                int newIndex = indexes.pop();
+                if(currentSongProperty().get() != null) {
+                    int currIndex = playlist.indexOf(currentSong.get());
+                    if(currIndex == newIndex)
+                        newIndex = indexes.pop();
+                }
+
+                song = playlist.getItem(newIndex);
             }
         }
 
@@ -193,5 +206,16 @@ public class SimplePlayer implements Player {
         player.setOnEndOfMedia(() -> next());
 
         return player;
+    }
+
+    private void shuffleBag(Stack<Integer> ar) {
+        Random rnd = new Random(System.currentTimeMillis());
+        for (int i = ar.size() - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            int a = ar.get(index);
+            ar.set(index, ar.get(i));
+            ar.set(i, a);
+        }
     }
 }

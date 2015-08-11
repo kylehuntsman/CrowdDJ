@@ -135,6 +135,10 @@ public class SimplePlaylist implements Playlist {
         return thePlaylist.get(index);
     }
 
+    public int indexOf(Song song) {
+        return thePlaylist.indexOf(song);
+    }
+
     private void populateFromDatabase() {
         DatabaseManager database = CrowdDJ.getDatabase();
 

@@ -13,6 +13,7 @@ public interface Playlist  {
     int size();
     String toXML();
 
+    int indexOf(Song song);
     Song getItem(int index);
     Song getNextItem(Song song);
     Song getRandomItem();
