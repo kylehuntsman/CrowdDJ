@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.jetty;
+package com.github.funnygopher.crowddj.server;
 
 import com.github.funnygopher.crowddj.player.Player;
 import org.eclipse.jetty.server.Request;

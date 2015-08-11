@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.jetty;
+package com.github.funnygopher.crowddj.server;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

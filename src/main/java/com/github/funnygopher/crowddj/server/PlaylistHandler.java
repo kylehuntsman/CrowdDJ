@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.jetty;
+package com.github.funnygopher.crowddj.server;
 
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.playlist.Song;

@@ -4,17 +4,7 @@ import com.github.funnygopher.crowddj.javafx.buttons.ButtonUtil;
 import com.github.funnygopher.crowddj.player.Player;
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.playlist.Song;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.google.zxing.qrcode.encoder.QRCode;
-import com.sun.javafx.iio.ImageStorage;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import com.github.funnygopher.crowddj.util.QRCode;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -31,15 +21,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.stage.StageStyle;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class CrowdDJController implements Initializable {
 
@@ -59,10 +45,10 @@ public class CrowdDJController implements Initializable {
     MenuItem miAddFiles, miClearPlaylist;
 
     @FXML
-    ToggleButton tbShowQRCode;
+    MenuItem miSaveQRCode;
 
     @FXML
-    CheckMenuItem cmiShuffle, cmiShowPlaylist;
+    CheckMenuItem cmiShuffle, cmiShowPlaylist, cmiShowQRCode;
 
     @FXML
     TableView<Song> tblPlaylist;
@@ -201,6 +187,8 @@ public class CrowdDJController implements Initializable {
         cmiShuffle.setAccelerator(new KeyCodeCombination(KeyCode.SLASH, KeyCombination.SHIFT_DOWN));
         cmiShowPlaylist.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
 
+        cmiShowQRCode.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
+
         miPlayPause.setOnAction(event -> player.play());
         miStop.setOnAction(event -> player.stop());
         miNext.setOnAction(event -> player.next());
@@ -219,11 +207,12 @@ public class CrowdDJController implements Initializable {
             pPlaylist.setVisible(newValue);
         });
 
-        tbShowQRCode.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue) {
+        miSaveQRCode.setOnAction(event -> saveQRCode());
+        cmiShowQRCode.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
                 ivCoverArt.setImage(QR_CODE);
             } else {
-                if(player.currentSongProperty().get() == null) {
+                if (player.currentSongProperty().get() == null) {
                     ivCoverArt.setImage(DEFAULT_COVER_ART);
                 } else {
                     ivCoverArt.setImage(player.currentSongProperty().get().coverArtProperty().get());
@@ -367,20 +356,21 @@ public class CrowdDJController implements Initializable {
     }
 
     private Image getQRCode() {
-        try {
-            Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
-            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix byteMatrix = qrCodeWriter.encode(serverCode, BarcodeFormat.QR_CODE, 250, 250, hintMap);
-            ByteOutputStream out = new ByteOutputStream();
-            MatrixToImageWriter.writeToStream(byteMatrix, "PNG", out);
-            return new Image(new ByteArrayInputStream(out.getBytes()));
-        } catch (WriterException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return new QRCode(serverCode).getImage();
+    }
 
-        return null;
+    private void saveQRCode() {
+        FileChooser fileChooser = new FileChooser();
+
+        //Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PNG Image", "*.png");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        //Show save file dialog
+        File file = fileChooser.showSaveDialog(apRoot.getScene().getWindow());
+
+        if(file != null){
+            new QRCode(serverCode).writeToFile(file);
+        }
     }
 }

@@ -1,21 +1,16 @@
 package com.github.funnygopher.crowddj.server;
 
 import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.jetty.AnybodyHomeHandler;
-import com.github.funnygopher.crowddj.jetty.PlaybackHandler;
-import com.github.funnygopher.crowddj.jetty.PlaylistHandler;
 import com.github.funnygopher.crowddj.player.Player;
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.util.Property;
 import com.github.funnygopher.crowddj.voting.VotingBooth;
-import javafx.scene.control.TextInputDialog;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 
 import java.net.BindException;
-import java.util.Optional;
 
 public class CrowdDJServer {
 

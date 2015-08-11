@@ -57,11 +57,8 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Server Code">
                <items>
-                  <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
-                     <content>
-                        <ToggleButton fx:id="tbShowQRCode" mnemonicParsing="false" text="Show QR Code" />
-                     </content>
-                  </CustomMenuItem>
+                  <MenuItem fx:id="miSaveQRCode" mnemonicParsing="false" text="Save QR Code..." />
+                  <CheckMenuItem fx:id="cmiShowQRCode" mnemonicParsing="false" text="Show QR Code" />
                </items>
             </Menu>
           <Menu mnemonicParsing="false" text="Help" />
