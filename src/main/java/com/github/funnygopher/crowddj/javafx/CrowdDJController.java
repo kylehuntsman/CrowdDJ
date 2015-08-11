@@ -134,6 +134,9 @@ public class CrowdDJController implements Initializable {
 
         clearPlaylistEvent = event -> {
             playlist.clear();
+            if(player.currentSongProperty().get() != null) {
+                player.reset();
+            }
             playlist.updateDatabaseTable();
         };
 
@@ -289,7 +292,7 @@ public class CrowdDJController implements Initializable {
         MenuItem addFiles = new MenuItem("Add files...");
         MenuItem clearPlaylist = new MenuItem("Clear playlist");
         addFiles.setOnAction(addFilesEvent);
-        clearPlaylist.setOnAction(addFilesEvent);
+        clearPlaylist.setOnAction(clearPlaylistEvent);
         contextMenu.getItems().addAll(addFiles, clearPlaylist);
         tblPlaylist.setContextMenu(contextMenu);
 
