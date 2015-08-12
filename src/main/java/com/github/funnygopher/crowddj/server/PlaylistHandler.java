@@ -10,8 +10,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class PlaylistHandler extends AbstractHandler {
 
@@ -25,9 +24,6 @@ public class PlaylistHandler extends AbstractHandler {
 
 	@Override
 	public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
-		httpServletResponse.setContentType("text/xml; charset=UTF-8");
-		httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-
 		String fileURI = httpServletRequest.getParameter("vote");
 		String id = httpServletRequest.getParameter("id");
         String user = httpServletRequest.getParameter("user");
@@ -39,8 +35,11 @@ public class PlaylistHandler extends AbstractHandler {
                 Song song = party.rescue();
                 votingBooth.vote(song, id);
             }
+            request.setHandled(true);
 		}
 
+        httpServletResponse.setContentType("text/xml; charset=UTF-8");
+        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 		String xml = playlist.toXML();
 		httpServletResponse.getWriter().println(xml);
 		request.setHandled(true);

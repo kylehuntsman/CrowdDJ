@@ -72,9 +72,7 @@ public class SimplePlaylist implements Playlist {
 
     public SearchParty<Song> search(File file) {
         for(Song song : thePlaylist) {
-            String songFile = song.getURI();
-            String fileURI = file.getPath();
-            if(songFile.equals(fileURI)) {
+            if(song.getFile().equals(file)) {
                 return new SearchParty<Song>(song);
             }
         }

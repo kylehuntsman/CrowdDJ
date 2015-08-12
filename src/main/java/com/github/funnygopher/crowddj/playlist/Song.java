@@ -83,7 +83,7 @@ public class Song implements Voteable {
 		String xmlString = "<song>" +
 				"<title>" + title.get() + "</title>" +
 				"<artist>" + artist.get() + "</artist>" +
-				"<uri>" + getURI() + "</uri>" +
+				"<uri>" + filepath + "</uri>" +
 				"<votes>" + votes.get() + "</votes>" +
 				"</song>";
 
