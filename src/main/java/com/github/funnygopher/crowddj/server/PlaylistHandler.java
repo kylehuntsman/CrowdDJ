@@ -29,14 +29,15 @@ public class PlaylistHandler extends AbstractHandler {
 		httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
 		String fileURI = httpServletRequest.getParameter("vote");
+		String id = httpServletRequest.getParameter("id");
         String user = httpServletRequest.getParameter("user");
 
-		if(fileURI != null && user != null) {
+		if(fileURI != null && id != null && user != null) {
 			File songFile = new File(fileURI);
             SearchParty<Song> party = playlist.search(songFile);
             if(party.found()) {
                 Song song = party.rescue();
-                votingBooth.vote(song, user);
+                votingBooth.vote(song, id);
             }
 		}
 
