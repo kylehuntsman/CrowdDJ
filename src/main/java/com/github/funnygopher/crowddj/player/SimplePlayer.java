@@ -178,7 +178,7 @@ public class SimplePlayer implements Player {
                 }
             }
 
-            if (shuffle.getValue()) {
+            if (shuffle.getValue() && playlist.size() > 1) {
                 Stack<Integer> indexes = new Stack<>();
                 for(int i = 0; i < playlist.size(); i++)
                     indexes.push(i);
