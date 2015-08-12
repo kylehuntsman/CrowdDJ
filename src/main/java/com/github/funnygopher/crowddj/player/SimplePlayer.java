@@ -70,6 +70,9 @@ public class SimplePlayer implements Player {
     }
 
     public void play() {
+        if(playlist.size() == 0)
+            return;
+
         if(currentPlayer.get() == null) {
             currentPlayer.set(getNextMediaPlayer());
         }
@@ -102,8 +105,10 @@ public class SimplePlayer implements Player {
     }
 
     public void next() {
-        final MediaPlayer nextPlayer = getNextMediaPlayer();
+        if(playlist.size() == 0)
+            return;
 
+        final MediaPlayer nextPlayer = getNextMediaPlayer();
         if(currentPlayer.get() != null) {
             currentPlayer.get().stop();
         }
