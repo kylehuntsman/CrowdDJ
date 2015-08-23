@@ -279,7 +279,7 @@ public class CrowdDJController implements Initializable {
         tblPlaylist.getStylesheets().add(getCss("playlist_table.css"));
 
         // Sets the content to display when there are no items in the table
-        Image downArrow = getImage("/dark/arrow-down-7-128.png");
+        Image downArrow = getImage("dark/arrow-down-7-128.png");
         ImageView ivPlaceholderImage = new ImageView(downArrow);
         Label lbPlaceholderLabel = new Label("\nPlaylist is currently empty.\nDrag files here or right click to add.");
         lbPlaceholderLabel.setTextAlignment(TextAlignment.CENTER);
