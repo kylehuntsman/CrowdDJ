@@ -5,7 +5,7 @@ import javafx.collections.ObservableList;
 
 import java.io.File;
 
-public interface Playlist  {
+public interface Playlist {
 
     void add(File file);
     void remove(Song song);

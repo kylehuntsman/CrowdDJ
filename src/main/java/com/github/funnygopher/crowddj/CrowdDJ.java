@@ -3,7 +3,6 @@ package com.github.funnygopher.crowddj;
 import com.github.funnygopher.crowddj.database.DatabaseManager;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
 import com.github.funnygopher.crowddj.player.Player;
-import com.github.funnygopher.crowddj.player.SimplePlayer;
 import com.github.funnygopher.crowddj.playlist.Playlist;
 import com.github.funnygopher.crowddj.playlist.SimplePlaylist;
 import com.github.funnygopher.crowddj.playlist.Song;
@@ -25,7 +24,7 @@ public class CrowdDJ {
     private static DatabaseManager database; // Manages calls to the database
     private static PropertyManager properties; // Manages the config.properties file
 
-    private SimplePlayer player; // Handles the playback of audio
+    private Player player; // Handles the playback of audio
     private SimplePlaylist playlist;
     private CrowdDJController controller;
     private CrowdDJServer server;
@@ -45,7 +44,7 @@ public class CrowdDJ {
 
         playlist = new SimplePlaylist(new ArrayList<Song>());
         votingBooth = new SimpleVotingBooth();
-        player = new SimplePlayer(playlist, votingBooth);
+        player = new Player(playlist, votingBooth);
         server = new CrowdDJServer(player, playlist, votingBooth);
 
         validPort = false;
@@ -85,6 +84,10 @@ public class CrowdDJ {
 
     public CrowdDJServer getServer() {
         return server;
+    }
+
+    public void dispose() {
+        playlist.dispose();
     }
 
     private void showUsedPortDialog() {

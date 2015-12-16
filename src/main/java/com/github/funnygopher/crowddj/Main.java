@@ -32,7 +32,7 @@ public class Main extends Application {
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/product_icon.png")));
             stage.setOnCloseRequest(windowEvent -> {
                 crowdDJ.getServer().stop();
-                crowdDJ.getPlayer().reset();
+                crowdDJ.dispose();
                 crowdDJ.getPlaylist().updateDatabaseTable();
             });
 

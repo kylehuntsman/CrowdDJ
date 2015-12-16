@@ -21,15 +21,15 @@ import static com.github.funnygopher.crowddj.database.jooq.Tables.PLAYLIST;
 
 public class SimplePlaylist implements Playlist {
 
-    private ObservableList<Song> thePlaylist;
+    private ObservableList<Song> mPlaylist;
     public final String CREATE_PLAYLIST_TABLE =
             "CREATE TABLE IF NOT EXISTS PLAYLIST (" +
                     "ID INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL," +
                     "FILEPATH VARCHAR(255) NOT NULL" +
                     ");";
 
-    public SimplePlaylist(List<Song> thePlaylist) {
-        this.thePlaylist = FXCollections.observableArrayList(thePlaylist);
+    public SimplePlaylist(List<Song> playlist) {
+        this.mPlaylist = FXCollections.observableArrayList(playlist);
         populateFromDatabase();
     }
 
@@ -53,26 +53,26 @@ public class SimplePlaylist implements Playlist {
             throw new NullPointerException();
         }
 
-        if(!thePlaylist.contains(song)) {
-            thePlaylist.add(song);
+        if(!mPlaylist.contains(song)) {
+            mPlaylist.add(song);
         }
     }
 
     public void remove(Song song) {
-        thePlaylist.remove(song);
+        mPlaylist.remove(song);
     }
 
     public void clear() {
-        thePlaylist.clear();
+        mPlaylist.clear();
     }
 
     public int size() {
-        return thePlaylist.size();
+        return mPlaylist.size();
     }
 
     public SearchParty<Song> search(File file) {
-        for(Song song : thePlaylist) {
-            if(song.getFile().equals(file)) {
+        for(Song song : mPlaylist) {
+            if(song.getFilePath().equals(file.getAbsolutePath())) {
                 return new SearchParty<Song>(song);
             }
         }
@@ -82,7 +82,7 @@ public class SimplePlaylist implements Playlist {
     public String toXML() {
         StringBuilder xmlBuilder = new StringBuilder();
         xmlBuilder.append("<playlist>");
-        for(Song song : thePlaylist) {
+        for(Song song : mPlaylist) {
             xmlBuilder.append(song.toXML());
         }
         xmlBuilder.append("</playlist>");
@@ -99,8 +99,8 @@ public class SimplePlaylist implements Playlist {
             db.execute("DROP TABLE PLAYLIST");
             db.execute(CREATE_PLAYLIST_TABLE);
 
-            for (Song song : thePlaylist) {
-                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(song.getFile().getPath()).returning().fetch();
+            for (Song song : mPlaylist) {
+                db.insertInto(PLAYLIST, PLAYLIST.FILEPATH).values(song.getFilePath()).returning().fetch();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -108,33 +108,33 @@ public class SimplePlaylist implements Playlist {
     }
 
     public ObservableList<Song> getItems() {
-        return thePlaylist;
+        return mPlaylist;
     }
 
     public Song getNextItem(Song song) {
         if(song == null) {
-            return thePlaylist.get(0);
+            return mPlaylist.get(0);
         }
 
-        int nextIndex = thePlaylist.indexOf(song) + 1;
-        if(nextIndex >= thePlaylist.size()) {
+        int nextIndex = mPlaylist.indexOf(song) + 1;
+        if(nextIndex >= mPlaylist.size()) {
             return null;
         } else {
-            return thePlaylist.get(nextIndex);
+            return mPlaylist.get(nextIndex);
         }
     }
 
     public Song getRandomItem() {
         Random rand = new Random(System.currentTimeMillis());
-        return thePlaylist.get(rand.nextInt(thePlaylist.size()));
+        return mPlaylist.get(rand.nextInt(mPlaylist.size()));
     }
 
     public Song getItem(int index) {
-        return thePlaylist.get(index);
+        return mPlaylist.get(index);
     }
 
     public int indexOf(Song song) {
-        return thePlaylist.indexOf(song);
+        return mPlaylist.indexOf(song);
     }
 
     private void populateFromDatabase() {
@@ -153,13 +153,19 @@ public class SimplePlaylist implements Playlist {
 
                 try {
                     Song song = new Song(file);
-                    thePlaylist.add(song);
+                    mPlaylist.add(song);
                 } catch (SongCreationException e) {
                     e.printError(e.getMessage());
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void dispose() {
+        for (Song song : mPlaylist) {
+            song.dispose();
         }
     }
 }

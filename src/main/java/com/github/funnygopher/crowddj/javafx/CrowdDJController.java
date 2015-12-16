@@ -133,10 +133,10 @@ public class CrowdDJController implements Initializable {
         };
 
         clearPlaylistEvent = event -> {
-            playlist.clear();
             if(player.currentSongProperty().get() != null) {
-                player.reset();
+                player.currentSongProperty().get().stop();
             }
+            playlist.clear();
             playlist.updateDatabaseTable();
         };
 
@@ -234,9 +234,9 @@ public class CrowdDJController implements Initializable {
         // What gets changed during presentation mode;
         pPlaylist.visibleProperty().bind(cmiPresentationMode.selectedProperty().not());
         cmiAutoHideMenuBar.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue) {
+            if (newValue) {
                 cmiPresentationMode.selectedProperty().addListener(autohideMenuListener);
-                if(cmiPresentationMode.selectedProperty().get()) {
+                if (cmiPresentationMode.selectedProperty().get()) {
                     hspMenuPane.setPinnedSide(null);
                 }
             } else {
@@ -303,30 +303,41 @@ public class CrowdDJController implements Initializable {
             // Plays the song when the row is double clicked
             row.setOnMouseClicked(mouseEvent -> {
                 if (mouseEvent.getClickCount() == 2 && (!row.isEmpty())) {
-                    player.play(row.getItem());
+                    if (player.currentSongProperty().get() != null) {
+                        player.stop();
+                    }
+
+                    player.setSong(row.getItem());
+                    player.play();
                 }
             });
 
+            // TODO: Test changing cover art of playing and non playing songs
             EventHandler<ActionEvent> changeCoverArt = event -> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cover Art", "*.jpg", "*.jpeg"));
                 File file = fileChooser.showOpenDialog(apRoot.getScene().getWindow());
 
-                if (row.getItem() == player.currentSongProperty().get()) {
-                    player.reset();
+                Song song = row.getItem();
+                if (song == player.currentSongProperty().get()) {
+                    song.stop();
+                    player.setSong(null);
                 }
 
                 if (file != null) {
-                    Song song = row.getItem();
-                    song.changeAlbumArt(file);
+                    song.changeCoverArt(file);
                 }
             };
 
+            // TODO: Test removing playlist items
             EventHandler<ActionEvent> removeSelectedItem = event -> {
-                if (row.getItem() == player.currentSongProperty().get()) {
-                    player.reset();
+                Song song = row.getItem();
+                if (song == player.currentSongProperty().get()) {
+                    song.stop();
+                    player.setSong(null);
                 }
-                playlist.remove(row.getItem());
+                playlist.remove(song);
+                song.dispose();
             };
 
             // Creates a context menu for the selected item

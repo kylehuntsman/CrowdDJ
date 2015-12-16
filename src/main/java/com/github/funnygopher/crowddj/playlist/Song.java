@@ -1,6 +1,6 @@
 package com.github.funnygopher.crowddj.playlist;
 
-import com.github.funnygopher.crowddj.player.SimplePlayer;
+import com.github.funnygopher.crowddj.player.Player;
 import com.github.funnygopher.crowddj.voting.Voteable;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class Song implements Comparable<Voteable>, Voteable, SimplePlayer.Preparable {
+public class Song implements Comparable<Voteable>, Voteable, Player.Preparable {
 
     private Media mMedia;
     private MediaPlayer mMediaPlayer;
