@@ -17,7 +17,6 @@ public class SongInformation {
     private StringProperty mTitle;
     private StringProperty mArtist;
     private StringProperty mAlbum;
-    private IntegerProperty mDuration;
     private ObjectProperty<Image> mCoverArt;
 
     private String mFilePath;
@@ -30,7 +29,6 @@ public class SongInformation {
         mTitle = new SimpleStringProperty(this, "mTitle", file.getName());
         mArtist = new SimpleStringProperty(this, "mArtist", "");
         mAlbum = new SimpleStringProperty(this, "mAlbum", "");
-        mDuration = new SimpleIntegerProperty(this, "mDuration", 0);
 
         Image defaultCoverArt = new Image(getClass().getResourceAsStream("/images/default_cover_art.png"));
         mCoverArt = new SimpleObjectProperty<>(this, "mCoverArt", defaultCoverArt);
@@ -55,8 +53,6 @@ public class SongInformation {
 
             String album = tag.getAlbum();
             if(album != null && !album.isEmpty()) mAlbum.set(album);
-
-            mDuration.set(tag.getLength());
 
             byte[] imageData = tag.getAlbumImage();
             if(imageData != null && imageData.length > 0) {
@@ -130,14 +126,6 @@ public class SongInformation {
 
     public StringProperty albumProperty() {
         return mAlbum;
-    }
-
-    public int getDuration() {
-        return mDuration.get();
-    }
-
-    public IntegerProperty durationProperty() {
-        return mDuration;
     }
 
     public Image getCoverArt() {

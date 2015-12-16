@@ -253,7 +253,7 @@ public class CrowdDJController implements Initializable {
                 if (player.currentSongProperty().get() == null) {
                     ivCoverArt.setImage(DEFAULT_COVER_ART);
                 } else {
-                    ivCoverArt.setImage(player.currentSongProperty().get().coverArtProperty().get());
+                    ivCoverArt.setImage(player.currentSongProperty().get().getCoverArt());
                 }
             }
         });
@@ -362,13 +362,13 @@ public class CrowdDJController implements Initializable {
             if (newSong == null) {
                 showDefaultPlayer();
             } else {
-                lbTitle.setText(newSong.titleProperty().get());
-                lbArtist.setText(newSong.artistProperty().get());
+                lbTitle.setText(newSong.getTitle());
+                lbArtist.setText(newSong.getArtist());
 
-                if (newSong.coverArtProperty().get() == null) {
+                if (newSong.getCoverArt() == null) {
                     ivCoverArt.setImage(DEFAULT_COVER_ART);
                 } else {
-                    ivCoverArt.setImage(newSong.coverArtProperty().get());
+                    ivCoverArt.setImage(newSong.getCoverArt());
                 }
             }
         });

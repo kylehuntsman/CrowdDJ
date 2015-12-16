@@ -126,12 +126,8 @@ public class Song implements Comparable<Voteable>, Voteable, Player.Preparable {
         return mSongInfo.albumProperty();
     }
 
-    public int getDuration() {
-        return mSongInfo.getDuration();
-    }
-
-    public IntegerProperty durationProperty() {
-        return mSongInfo.durationProperty();
+    public double getDuration() {
+        return mMediaPlayer.getTotalDuration().toSeconds();
     }
 
     public Image getCoverArt() {

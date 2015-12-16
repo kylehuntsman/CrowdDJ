@@ -65,6 +65,7 @@ public class Player {
             }
             newSong.prepare(mStatusChangeListener, mCurrentTimeChangeListener, mTotalDurationChangeListener, mVolume,
                     mOnEndOfMedia);
+            mDuration.set(newSong.getDuration());
         }));
     }
 
