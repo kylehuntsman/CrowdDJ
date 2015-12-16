@@ -1,89 +1,69 @@
 package com.github.funnygopher.crowddj.playlist;
 
+import com.github.funnygopher.crowddj.player.SimplePlayer;
 import com.github.funnygopher.crowddj.voting.Voteable;
-import com.github.funnygopher.crowddj.util.XFile;
-import com.mpatric.mp3agic.*;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class Song implements Voteable {
+public class Song implements Comparable<Voteable>, Voteable, SimplePlayer.Preparable {
 
-    private String filepath;
-	private StringProperty title;
-	private StringProperty artist;
-    private StringProperty album;
-	private IntegerProperty duration;
-	private IntegerProperty votes;
-    private ObjectProperty<Image> coverArt;
+    private Media mMedia;
+    private MediaPlayer mMediaPlayer;
+
+	private SongInformation mSongInfo;
+    private IntegerProperty votes;
 
 	public Song(File file) throws SongCreationException {
-		this.filepath = file.getAbsolutePath();
-
-		if(!file.getName().endsWith(".mp3"))
+        if(!file.getName().endsWith(".mp3"))
             throw new SongCreationException(file);
 
-        title = new SimpleStringProperty(this, "title", file.getName());
-        artist = new SimpleStringProperty(this, "artist", "");
-        album = new SimpleStringProperty(this, "album", "");
-        duration = new SimpleIntegerProperty(this, "duration", 0);
-        votes = new SimpleIntegerProperty(this, "votes", 0);
-        coverArt = new SimpleObjectProperty<>(this, "coverArt", null);
+        // Gets all the information about the song
+		String filePath = file.getAbsolutePath();
+        mSongInfo = new SongInformation(filePath);
 
-		getMp3Information(filepath);
-	}
-
-	public File getFile() {
-		return new File(filepath);
-	}
-
-	public String getURI() {
+        // Creates a media file to manipulate the playback of the song
+        String fileUri;
         try {
-            return URLEncoder.encode(filepath, "UTF-8").replaceAll("\\+", "%20").replaceAll("&", "%26");
+            fileUri = URLEncoder.encode(filePath, "UTF-8").replaceAll("\\+", "%20").replaceAll("&", "%26");
         } catch (UnsupportedEncodingException e) {
-            return String.valueOf(getFile().toURI());
+            fileUri = String.valueOf(file.toURI());
         }
-    }
+        mMedia = new Media("file:///" + fileUri);
+        mMediaPlayer = new MediaPlayer(mMedia);
 
-	public String getFileURI() {
-		return "file:///" + getURI();
+        votes = new SimpleIntegerProperty(this, "votes", 0);
 	}
 
-
-    public ReadOnlyStringProperty titleProperty() {
-        return title;
+    public void play() {
+        mMediaPlayer.play();
     }
 
-    public ReadOnlyStringProperty artistProperty() {
-        return artist;
+    public void pause() {
+        mMediaPlayer.pause();
     }
 
-    public ReadOnlyStringProperty albumProperty() {
-        return album;
+    public void stop() {
+        mMediaPlayer.stop();
     }
 
-    public ReadOnlyIntegerProperty durationProperty() {
-        return duration;
+    public void dispose() {
+        mMediaPlayer.dispose();
     }
 
-    public ReadOnlyIntegerProperty votesProperty() {
-        return votes;
-    }
-
-    public ReadOnlyObjectProperty<Image> coverArtProperty() {
-        return coverArt;
-    }
-
-
+    // TODO: Change to JSON
 	public String toXML() {
 		String xmlString = "<song>" +
-				"<title>" + title.get() + "</title>" +
-				"<artist>" + artist.get() + "</artist>" +
-				"<uri>" + filepath + "</uri>" +
+				"<title>" + getTitle() + "</title>" +
+				"<artist>" + getArtist() + "</artist>" +
+				"<uri>" + getFilePath() + "</uri>" +
 				"<votes>" + votes.get() + "</votes>" +
 				"</song>";
 
@@ -104,72 +84,11 @@ public class Song implements Voteable {
         votes.set(0);
     }
 
-	private void getMp3Information(String filepath) throws SongCreationException {
-        try {
-            Mp3File song = new Mp3File(filepath);
-            if (song.hasId3v2Tag()) {
-                ID3v2 tag = song.getId3v2Tag();
-
-                title.set(tag.getTitle());
-                artist.set(tag.getArtist());
-                album.set(tag.getAlbum());
-                duration.set(tag.getLength());
-
-                byte[] imageData = tag.getAlbumImage();
-				if(imageData != null) {
-                    coverArt.set(new Image(new ByteArrayInputStream(imageData)));
-                }
-            }
-        } catch (UnsupportedTagException | InvalidDataException | IOException e) {
-            e.printStackTrace();
-        }
+    public void changeCoverArt(File file) {
+        mSongInfo.changeCoverArt(file);
     }
 
-    public void changeAlbumArt(File file) {
-        String retagExtension = ".retag";
-        String backupExtension = ".bak";
-
-        try {
-            Mp3File mp3File = new Mp3File(filepath);
-
-            if (mp3File.hasId3v2Tag()) {
-                ID3v2 tag = mp3File.getId3v2Tag();
-
-                // Sets the new image
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                BufferedImage img = ImageIO.read(file);
-                ImageIO.write(img, "jpg", baos);
-                baos.flush();
-                byte[] imageData = baos.toByteArray();
-                baos.close();
-
-                tag.setAlbumImage(imageData, "image/jpeg");
-                mp3File.setId3v2Tag(tag);
-                mp3File.save(filepath + retagExtension);
-
-                XFile originalFile = new XFile(filepath);
-                XFile backupFile = new XFile(filepath + backupExtension);
-                XFile retaggedFile = new XFile(filepath + retagExtension);
-                if (backupFile.exists())
-                    backupFile.delete();
-
-                originalFile.renameTo(backupFile);
-                retaggedFile.renameTo(originalFile);
-
-                if (backupFile.exists())
-                    backupFile.delete();
-
-                getMp3Information(filepath);
-            }
-        } catch (UnsupportedTagException | InvalidDataException | IOException e) {
-            e.printStackTrace();
-        } catch (NotSupportedException e) {
-            e.printStackTrace();
-        } catch (SongCreationException e) {
-            e.printStackTrace();
-        }
-    }
-
+    @Override
     public int compareTo(Voteable voteable) {
         if(this.votesProperty().get() == voteable.votesProperty().get())
             return 0;
@@ -181,5 +100,66 @@ public class Song implements Voteable {
             return 1;
 
         return 0;
+    }
+
+    public String getTitle() {
+        return mSongInfo.getTitle();
+    }
+
+    public StringProperty titleProperty() {
+        return mSongInfo.titleProperty();
+    }
+
+    public String getArtist() {
+        return mSongInfo.getArtist();
+    }
+
+    public StringProperty artistProperty() {
+        return mSongInfo.artistProperty();
+    }
+
+    public String getAlbum() {
+        return mSongInfo.getAlbum();
+    }
+
+    public StringProperty albumProperty() {
+        return mSongInfo.albumProperty();
+    }
+
+    public int getDuration() {
+        return mSongInfo.getDuration();
+    }
+
+    public IntegerProperty durationProperty() {
+        return mSongInfo.durationProperty();
+    }
+
+    public Image getCoverArt() {
+        return mSongInfo.getCoverArt();
+    }
+
+    public ObjectProperty<Image> coverArtProperty() {
+        return mSongInfo.coverArtProperty();
+    }
+
+    public String getFilePath() {
+        return mSongInfo.getFilePath();
+    }
+
+    public ReadOnlyIntegerProperty votesProperty() {
+        return votes;
+    }
+
+    @Override
+    public void prepare(ChangeListener<MediaPlayer.Status> statusListener, ChangeListener<Duration> currTimeListener, ChangeListener<Duration> durationListner, double volume, Runnable endOfMedia) {
+        mMediaPlayer.setOnError(() -> {
+            System.err.println("Media error occurred: " + mMediaPlayer.getError());
+            mMediaPlayer.getError().printStackTrace();
+        });
+
+        mMediaPlayer.statusProperty().addListener(statusListener);
+        mMediaPlayer.currentTimeProperty().addListener(currTimeListener);
+        mMediaPlayer.totalDurationProperty().addListener(durationListner);
+        mMediaPlayer.setVolume(volume);
     }
 }

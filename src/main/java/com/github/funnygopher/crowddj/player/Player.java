@@ -8,12 +8,13 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 public interface Player {
 
     void play();
-    void play(Song song);
     void pause();
     void stop();
     void next();
+    void previous();
     void loop();
     void shuffle();
+    void setSong(Song song);
 
     ReadOnlyBooleanProperty playingProperty();
     ReadOnlyBooleanProperty pausedProperty();
@@ -24,6 +25,4 @@ public interface Player {
     ReadOnlyDoubleProperty currentTimeProperty();
     ReadOnlyDoubleProperty durationProperty();
     ReadOnlyObjectProperty<Song> currentSongProperty();
-
-    void reset();
 }
