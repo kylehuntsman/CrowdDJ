@@ -16,11 +16,16 @@
             <version>4.12</version>
         </dependency>
 
-        <!-- Jetty web server for handling HTTP requests-->
+        <!-- DropWizard -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>9.3.0.v20150612</version>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-core</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-jdbi</artifactId>
+            <version>0.9.1</version>
         </dependency>
 
         <!-- H2 Database -->
@@ -28,23 +33,6 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.187</version>
-        </dependency>
-
-        <!-- jOOQ for SQL -->
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-            <version>3.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq-meta</artifactId>
-            <version>3.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq-codegen</artifactId>
-            <version>3.6.2</version>
         </dependency>
 
         <!-- mp3agic for audio file parsing -->

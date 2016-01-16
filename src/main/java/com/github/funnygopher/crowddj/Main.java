@@ -33,7 +33,6 @@ public class Main extends Application {
             stage.setOnCloseRequest(windowEvent -> {
                 crowdDJ.getServer().stop();
                 crowdDJ.dispose();
-                crowdDJ.getPlaylist().updateDatabaseTable();
             });
 
             stage.setTitle("CrowdDJ - Let The Crowd Choose");

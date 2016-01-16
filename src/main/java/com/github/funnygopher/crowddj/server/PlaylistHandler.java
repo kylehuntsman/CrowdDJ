@@ -1,47 +1,48 @@
 package com.github.funnygopher.crowddj.server;
 
-import com.github.funnygopher.crowddj.playlist.Playlist;
-import com.github.funnygopher.crowddj.playlist.Song;
-import com.github.funnygopher.crowddj.util.SearchParty;
-import com.github.funnygopher.crowddj.voting.VotingBooth;
+import com.github.funnygopher.crowddj.database.DatabaseManager;
+import com.github.funnygopher.crowddj.database.SongDao;
+import com.github.funnygopher.crowddj.song.Song;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
 
 public class PlaylistHandler extends AbstractHandler {
 
-    private Playlist playlist;
-    private VotingBooth<Song> votingBooth;
+    private DatabaseManager mDatabaseManager;
+    private SongDao mSongDao;
 
-	public PlaylistHandler(Playlist playlist, VotingBooth<Song> votingBooth) {
-        this.playlist = playlist;
-        this.votingBooth = votingBooth;
+	public PlaylistHandler(DatabaseManager databaseManager) {
+        mDatabaseManager = databaseManager;
+        mSongDao = new SongDao(mDatabaseManager);
 	}
 
 	@Override
 	public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
-		String fileURI = httpServletRequest.getParameter("vote");
-		String id = httpServletRequest.getParameter("id");
-        String user = httpServletRequest.getParameter("user");
+        String id = httpServletRequest.getParameter("queue"); // The id of the song to queue
+        String user = httpServletRequest.getParameter("user"); // The user who submitted the queue request
 
-		if(fileURI != null && id != null && user != null) {
-			File songFile = new File(fileURI);
-            SearchParty<Song> party = playlist.search(songFile);
-            if(party.found()) {
-                Song song = party.rescue();
-                votingBooth.vote(song, id);
+        // Ex: http://www.crowddj.com/playlist?queue=1&user=johndoe
+        // id = 1
+        // user = johndoe
+
+		if(id != null && user != null) {
+            Song song = mSongDao.get(Long.valueOf(id));
+            if(song != null) {
+                // TODO: Add song to jukebox queue. This needs to be a generic call to allow multiple jukebox modes.
             }
             request.setHandled(true);
 		}
 
-        httpServletResponse.setContentType("text/xml; charset=UTF-8");
+        httpServletResponse.setContentType("text/json; charset=UTF-8");
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-		String xml = playlist.toXML();
-		httpServletResponse.getWriter().println(xml);
+        // TODO: This needs to return more information about the server. Current mode, version of software, etc.
+		//String json = musicLibrary.toJson();
+		//httpServletResponse.getWriter().println(json);
 		request.setHandled(true);
 	}
 }

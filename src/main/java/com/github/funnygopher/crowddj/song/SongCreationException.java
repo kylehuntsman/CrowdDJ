@@ -1,4 +1,4 @@
-package com.github.funnygopher.crowddj.playlist;
+package com.github.funnygopher.crowddj.song;
 
 import java.io.File;
 

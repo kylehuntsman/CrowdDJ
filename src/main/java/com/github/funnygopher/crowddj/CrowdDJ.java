@@ -1,34 +1,26 @@
 package com.github.funnygopher.crowddj;
 
 import com.github.funnygopher.crowddj.database.DatabaseManager;
+import com.github.funnygopher.crowddj.database.H2DatabaseManager;
 import com.github.funnygopher.crowddj.javafx.CrowdDJController;
-import com.github.funnygopher.crowddj.player.Player;
-import com.github.funnygopher.crowddj.playlist.Playlist;
-import com.github.funnygopher.crowddj.playlist.SimplePlaylist;
-import com.github.funnygopher.crowddj.playlist.Song;
 import com.github.funnygopher.crowddj.server.CrowdDJServer;
 import com.github.funnygopher.crowddj.util.Property;
 import com.github.funnygopher.crowddj.util.PropertyManager;
-import com.github.funnygopher.crowddj.voting.SimpleVotingBooth;
-import com.github.funnygopher.crowddj.voting.VotingBooth;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
 import java.net.*;
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class CrowdDJ {
 
-    private static DatabaseManager database; // Manages calls to the database
     private static PropertyManager properties; // Manages the config.properties file
 
-    private Player player; // Handles the playback of audio
-    private SimplePlaylist playlist;
+    private Jukebox mJukebox;
+    private MusicLibrary mMusicLibrary;
     private CrowdDJController controller;
     private CrowdDJServer server;
-    private VotingBooth votingBooth;
 
     private final String serverCode;
     private boolean validPort;
@@ -40,12 +32,14 @@ public class CrowdDJ {
 		// Sets up the database
 		String dbUsername = properties.getStringProperty(Property.DB_USERNAME);
 		String dbPassword = properties.getStringProperty(Property.DB_PASSWORD);
-		database = new DatabaseManager("jdbc:h2:~/.CrowdDJ/db/crowddj", dbUsername, dbPassword);
 
-        playlist = new SimplePlaylist(new ArrayList<Song>());
-        votingBooth = new SimpleVotingBooth();
-        player = new Player(playlist, votingBooth);
-        server = new CrowdDJServer(player, playlist, votingBooth);
+		DatabaseManager databaseManager = new H2DatabaseManager("jdbc:h2:~/.CrowdDJ/db/crowddj", dbUsername, dbPassword);
+        mMusicLibrary = new MusicLibrary(databaseManager);
+
+        mJukebox = new Jukebox(mMusicLibrary);
+
+        int port = properties.getIntProperty(Property.PORT);
+        server = new CrowdDJServer(mJukebox, databaseManager, port);
 
         validPort = false;
         do {
@@ -59,23 +53,15 @@ public class CrowdDJ {
         } while(!validPort);
 
         serverCode = "crowddjmobileapp://" + getIpAddress() + ":" + properties.getIntProperty(Property.PORT);
-        controller = new CrowdDJController(player, playlist, serverCode);
-    }
-
-    public static DatabaseManager getDatabase() {
-        return database;
+        controller = new CrowdDJController(player, mMusicLibrary, serverCode);
     }
 
     public static PropertyManager getProperties() {
         return properties;
     }
 
-    public Playlist getPlaylist() {
-        return playlist;
-    }
-
-    public Player getPlayer() {
-        return player;
+    public MusicLibrary getMusicLibrary() {
+        return mMusicLibrary;
     }
 
     public CrowdDJController getController() {
@@ -87,7 +73,7 @@ public class CrowdDJ {
     }
 
     public void dispose() {
-        playlist.dispose();
+        mMusicLibrary.dispose();
     }
 
     private void showUsedPortDialog() {
@@ -103,7 +89,7 @@ public class CrowdDJ {
             CrowdDJ.getProperties().setProperty(Property.PORT, result.get());
             CrowdDJ.getProperties().saveProperties();
 
-            server = new CrowdDJServer(player, playlist, votingBooth);
+            server = new CrowdDJServer(player, mMusicLibrary, votingBooth);
         } catch (NoSuchElementException e) {
             server.forceStop();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

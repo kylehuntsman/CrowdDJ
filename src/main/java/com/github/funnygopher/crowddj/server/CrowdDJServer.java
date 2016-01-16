@@ -1,10 +1,7 @@
 package com.github.funnygopher.crowddj.server;
 
-import com.github.funnygopher.crowddj.CrowdDJ;
-import com.github.funnygopher.crowddj.player.Player;
-import com.github.funnygopher.crowddj.playlist.Playlist;
-import com.github.funnygopher.crowddj.util.Property;
-import com.github.funnygopher.crowddj.voting.VotingBooth;
+import com.github.funnygopher.crowddj.Jukebox;
+import com.github.funnygopher.crowddj.database.DatabaseManager;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -16,17 +13,16 @@ public class CrowdDJServer {
 
     private Server server;
 
-    public CrowdDJServer(Player player, Playlist playlist, VotingBooth votingBooth) {
-        int port = CrowdDJ.getProperties().getIntProperty(Property.PORT);
+    public CrowdDJServer(Jukebox jukebox, DatabaseManager databaseManager, int port) {
         server = new Server(port);
 
         ContextHandler playbackContext = new ContextHandler();
         playbackContext.setContextPath("/playback");
-        playbackContext.setHandler(new PlaybackHandler(player));
+        playbackContext.setHandler(new PlaybackHandler(jukebox));
 
         ContextHandler playlistContext = new ContextHandler();
         playlistContext.setContextPath("/playlist");
-        playlistContext.setHandler(new PlaylistHandler(playlist, votingBooth));
+        playlistContext.setHandler(new PlaylistHandler(databaseManager));
 
         ContextHandler anybodyHomeContext = new ContextHandler();
         anybodyHomeContext.setContextPath("/anybodyhome");

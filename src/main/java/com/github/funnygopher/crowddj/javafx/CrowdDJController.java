@@ -1,9 +1,10 @@
 package com.github.funnygopher.crowddj.javafx;
 
 import com.github.funnygopher.crowddj.javafx.buttons.ButtonUtil;
+import com.github.funnygopher.crowddj.song.Song;
 import com.github.funnygopher.crowddj.player.Player;
-import com.github.funnygopher.crowddj.playlist.Playlist;
-import com.github.funnygopher.crowddj.playlist.Song;
+import com.github.funnygopher.crowddj.MusicLibrary;
+import com.github.funnygopher.crowddj.song.SongInfo;
 import com.github.funnygopher.crowddj.util.QRCode;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -82,7 +83,7 @@ public class CrowdDJController implements Initializable {
     HiddenSidesPane hspMenuPane;
 
     private final Player player;
-    private final Playlist playlist;
+    private final MusicLibrary musicLibrary;
     private final String serverCode;
 
     private final Image DEFAULT_COVER_ART;
@@ -90,9 +91,9 @@ public class CrowdDJController implements Initializable {
     private EventHandler<ActionEvent> addFilesEvent, clearPlaylistEvent;
     private ChangeListener<? super Boolean> autohideMenuListener;
 
-    public CrowdDJController(Player player, Playlist playlist, String serverCode) {
+    public CrowdDJController(Player player, MusicLibrary musicLibrary, String serverCode) {
         this.player = player;
-        this.playlist = playlist;
+        this.musicLibrary = musicLibrary;
         this.serverCode = serverCode;
 
         DEFAULT_COVER_ART = getImage("default_cover_art.png");
@@ -107,7 +108,8 @@ public class CrowdDJController implements Initializable {
         initPlaylistView();
         initPlayerView();
 
-        player.playingProperty().addListener((observable, wasPlaying, isPlaying) -> {
+        // Changes the playback menu items depending on playback state
+        player.getPlayingProperty().addListener((observable, wasPlaying, isPlaying) -> {
             if (isPlaying) {
                 miPlayPause.setOnAction(event -> player.pause());
                 miPlayPause.setText("Pause");
@@ -117,8 +119,9 @@ public class CrowdDJController implements Initializable {
             }
         });
 
-        bPlay.visibleProperty().bind(player.pausedProperty().or(player.stoppedProperty()));
-        bPause.visibleProperty().bind(player.playingProperty());
+        // Shows the correct playback button depending on playback state
+        bPlay.visibleProperty().bind(player.getPausedProperty().or(player.getStoppedProperty()));
+        bPause.visibleProperty().bind(player.getPlayingProperty());
 
         showDefaultPlayer();
     }
@@ -128,16 +131,16 @@ public class CrowdDJController implements Initializable {
             FileChooser fileChooser = new FileChooser();
             List<File> list = fileChooser.showOpenMultipleDialog(apRoot.getScene().getWindow());
             if (list != null) {
-                list.forEach(file -> playlist.add(file));
+                list.forEach(file -> musicLibrary.add(file));
             }
         };
 
         clearPlaylistEvent = event -> {
-            if(player.currentSongProperty().get() != null) {
-                player.currentSongProperty().get().stop();
+            if(!player.isEmpty()) {
+                player.stop();
             }
-            playlist.clear();
-            playlist.updateDatabaseTable();
+            musicLibrary.clear();
+            musicLibrary.update();
         };
 
         autohideMenuListener = (observable, oldValue, newValue) -> {
@@ -185,7 +188,7 @@ public class CrowdDJController implements Initializable {
             Dragboard db = dragEvent.getDragboard();
             if (db.hasFiles()) {
                 dragEvent.setDropCompleted(true);
-                db.getFiles().forEach(file -> playlist.add(file));
+                db.getFiles().forEach(file -> musicLibrary.add(file));
             } else {
                 dragEvent.setDropCompleted(false);
             }
@@ -250,10 +253,10 @@ public class CrowdDJController implements Initializable {
             if (newValue) {
                 ivCoverArt.setImage(QR_CODE);
             } else {
-                if (player.currentSongProperty().get() == null) {
+                if (player.isEmpty()) {
                     ivCoverArt.setImage(DEFAULT_COVER_ART);
                 } else {
-                    ivCoverArt.setImage(player.currentSongProperty().get().getCoverArt());
+                    ivCoverArt.setImage(player.getSong().getInfo().getCoverArt());
                 }
             }
         });
@@ -273,7 +276,7 @@ public class CrowdDJController implements Initializable {
         playlistArtist.setCellValueFactory(new PropertyValueFactory<>("artist"));
         playlistVotes.setCellValueFactory(new PropertyValueFactory<>("votes"));
 
-        tblPlaylist.setItems(playlist.getItems());
+        tblPlaylist.setItems(musicLibrary.getSongs());
         tblPlaylist.getColumns().addAll(playlistTitle, playlistArtist, playlistVotes);
         tblPlaylist.setOpacity(.75);
         tblPlaylist.getStylesheets().add(getCss("playlist_table.css"));
@@ -303,7 +306,7 @@ public class CrowdDJController implements Initializable {
             // Plays the song when the row is double clicked
             row.setOnMouseClicked(mouseEvent -> {
                 if (mouseEvent.getClickCount() == 2 && (!row.isEmpty())) {
-                    if (player.currentSongProperty().get() != null) {
+                    if (!player.isEmpty()) {
                         player.stop();
                     }
 
@@ -312,31 +315,27 @@ public class CrowdDJController implements Initializable {
                 }
             });
 
-            // TODO: Test changing cover art of playing and non playing songs
             EventHandler<ActionEvent> changeCoverArt = event -> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cover Art", "*.jpg", "*.jpeg"));
                 File file = fileChooser.showOpenDialog(apRoot.getScene().getWindow());
 
                 Song song = row.getItem();
-                if (song == player.currentSongProperty().get()) {
-                    song.stop();
-                    player.setSong(null);
+                if (song == player.getSong()) {
+                    player.eject();
                 }
 
                 if (file != null) {
-                    song.changeCoverArt(file);
+                    song.getInfo().changeCoverArt(file);
                 }
             };
 
-            // TODO: Test removing playlist items
             EventHandler<ActionEvent> removeSelectedItem = event -> {
                 Song song = row.getItem();
-                if (song == player.currentSongProperty().get()) {
-                    song.stop();
-                    player.setSong(null);
+                if (song == player.getSong()) {
+                    player.eject();
                 }
-                playlist.remove(song);
+                musicLibrary.remove(song);
                 song.dispose();
             };
 
@@ -358,17 +357,18 @@ public class CrowdDJController implements Initializable {
     }
 
     private void initPlayerView() {
-        player.currentSongProperty().addListener((observable1, oldSong, newSong) -> {
+        player.getSongProperty().addListener((observable1, oldSong, newSong) -> {
             if (newSong == null) {
                 showDefaultPlayer();
             } else {
-                lbTitle.setText(newSong.getTitle());
-                lbArtist.setText(newSong.getArtist());
+                SongInfo info = newSong.getInfo();
+                lbTitle.setText(info.getTitle());
+                lbArtist.setText(info.getArtist());
 
-                if (newSong.getCoverArt() == null) {
+                if (info.getCoverArt() == null) {
                     ivCoverArt.setImage(DEFAULT_COVER_ART);
                 } else {
-                    ivCoverArt.setImage(newSong.getCoverArt());
+                    ivCoverArt.setImage(info.getCoverArt());
                 }
             }
         });
@@ -388,12 +388,12 @@ public class CrowdDJController implements Initializable {
         bPause.setVisible(false);
         bStop.setVisible(false);
 
-        player.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+        player.getTimeProperty().addListener((observable, oldValue, newValue) -> {
             lbSongTime.setText(String.format("%02d:%02d", newValue.intValue() / 60, newValue.intValue() % 60));
-            double duration = player.durationProperty().get();
+            double duration = player.getDuration();
             pbSongProgress.setProgress(newValue.doubleValue() / duration);
         });
-        player.durationProperty().addListener((observable, oldValue, newValue) -> {
+        player.getDurationProperty().addListener((observable, oldValue, newValue) -> {
             lbSongTotalTime.setText(String.format("%02d:%02d", newValue.intValue() / 60, newValue.intValue() % 60));
         });
     }
