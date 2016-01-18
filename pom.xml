@@ -4,28 +4,43 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.funnygopher.crowddj</groupId>
-    <artifactId>CrowdDJ</artifactId>
+    <groupId>com.github.funnygopher.crowddj</groupId>
+    <artifactId>crowddj-parent</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>CrowdDJ</name>
+
+    <url>https://github.com/FunnyGopher/CrowdDJ</url>
+    <inceptionYear>2014</inceptionYear>
+
+    <modules>
+        <module>crowddj-api</module>
+        <module>crowddj-client</module>
+        <module>crowddj-service</module>
+    </modules>
+
+    <developers>
+        <developer>
+            <name>Kyle Huntsman</name>
+            <email>huntsman.kyle@gmail.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <dropwizard.version>0.9.1</dropwizard.version>
+    </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
-
         <!-- DropWizard -->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-            <version>0.9.1</version>
+            <version>${dropwizard.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-jdbi</artifactId>
-            <version>0.9.1</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
 
         <!-- H2 Database -->
@@ -60,7 +75,6 @@
             <artifactId>controlsfx</artifactId>
             <version>8.40.9</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -74,6 +88,7 @@
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
@@ -92,7 +107,7 @@
 
                     <archive>
                         <manifest>
-                            <mainClass>com.github.funnygopher.crowddj.Main</mainClass>
+                            <mainClass>com.github.funnygopher.crowddj.client.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
