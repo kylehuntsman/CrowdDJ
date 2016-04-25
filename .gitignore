@@ -1,3 +1,4 @@
 /.idea
-congif.properties
+crowddj.properties
 *.iml
+/target

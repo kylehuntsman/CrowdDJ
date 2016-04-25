@@ -17,7 +17,7 @@ public class SimpleVotingBooth<T extends Voteable> implements VotingBooth<T> {
 
     public void vote(T voteable, String whoVoted) {
         if(logs.keySet().contains(whoVoted)) {
-            Voteable prevVote = logs.get(whoVoted);
+            T prevVote = logs.get(whoVoted);
             prevVote.unvote();
             votes.remove(prevVote);
         }
